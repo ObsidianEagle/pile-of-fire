@@ -1,0 +1,17 @@
+{
+  "name": "pile-of-fire",
+  "version": "0.1.0",
+  "main": "index.js",
+  "type": "module",
+  "repository": "https://github.com/ObsidianEagle/pile-of-fire.git",
+  "author": "Alex King <alex.aquus@googlemail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "node src/index.js",
+    "watch": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "nodemon": "^2.0.6",
+    "ws": "^7.3.1"
+  }
+}
