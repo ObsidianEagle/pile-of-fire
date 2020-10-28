@@ -1,50 +1,147 @@
 import WebSocket from 'ws';
+import { CHANGE_STATUS, DRAW_CARD, GAME_STATE, PLAYER_INIT, PLAYER_INIT_ACK } from './constants/messages.js';
+import { WAITING_FOR_PLAYERS, GAME_ENDED, GAME_ENDED_FROM_ERROR, IN_PROGRESS } from './constants/statuses.js';
 
 const wss = new WebSocket.Server({ port: 8080 });
 const clients = [];
-let counter = 0;
+let counter = 1;
 
-wss.on('connection', ws => {
-    ws.id = counter++;
-    clients.push(ws);
+const populateDeck = (numberOfDecks) => {
+  const suits = ['HEARTS', 'SPADES', 'DIAMONDS', 'CLUBS'];
+  const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
-    ws.on('open', () => {
-        console.log(`client ${ws.id}: connection opened`);
+  const deck = [];
+  for (let i = 0; i < numberOfDecks; i++) {
+    suits.forEach((suit) => {
+      values.forEach((value) => {
+        deck.push({ suit, value });
+      });
     });
+  }
 
-    ws.on('message', reqString => {
-        const req = JSON.parse(reqString);
-        console.log(req);
-        switch (req.type) {
-            case 'PLAYER_INIT':
-                ws.name = req.payload.name;
-                const res = {
-                    type: 'PLAYER_INIT_ACK',
-                    payload: { id: ws.id }
-                };
-                ws.send(JSON.stringify(res));
-                console.log(`client ${ws.id}: player initiated with name ${ws.name}`);
-                break;
-            case 'MAKE_MOVE':
-                const { suit, value } = req.payload;
-                console.log(`client ${ws.id}: received move ${suit}${value}`);
-            default:
-                break;
+  return deck;
+};
+
+const gameState = {
+  deck: populateDeck(1),
+  status: WAITING_FOR_PLAYERS,
+  lastCardDrawn: null,
+  lastPlayer: null,
+  nextPlayer: null,
+  players: [],
+  mates: [],
+  currentHolders: {
+    A: null,
+    Q: null,
+    5: null,
+  },
+};
+
+const broadcastGameState = () => {
+  const msgObject = {
+    type: GAME_STATE,
+    payload: { gameState },
+  };
+  const msgString = JSON.stringify(msgObject);
+  clients.forEach((client) => client.send(msgString));
+  console.log('updated game state broadcast to all clients');
+};
+
+const updateGameStatus = () => {
+  if (!gameState.deck.length) {
+    gameState.status = GAME_ENDED;
+  } else if (gameState.players.length < 2) {
+    gameState.status = WAITING_FOR_PLAYERS;
+  } else {
+    gameState.status = IN_PROGRESS;
+  }
+}
+
+wss.on('connection', (ws) => {
+  ws.id = counter++;
+  clients.push(ws);
+
+  ws.on('open', () => {
+    console.log(`client ${ws.id}: connection opened`);
+  });
+
+  ws.on('message', (reqString) => {
+    const req = JSON.parse(reqString);
+    console.log(req);
+    switch (req.type) {
+      case PLAYER_INIT:
+        ws.name = req.payload.name;
+        gameState.players.push({
+          name: ws.name,
+          id: ws.id,
+        });
+        if (!gameState.nextPlayer) gameState.nextPlayer = ws.id;
+        const res = {
+          type: PLAYER_INIT_ACK,
+          payload: { id: ws.id, gameState },
+        };
+        updateGameStatus();
+        ws.send(JSON.stringify(res));
+        console.log(`client ${ws.id}: player initiated with name ${ws.name}`);
+        break;
+      case CHANGE_STATUS:
+        gameState.status = req.payload.status;
+        console.log(`client ${ws.id}: game status changed to ${req.payload.status}`);
+        broadcastGameState();
+      case DRAW_CARD:
+        if (ws.id !== gameState.nextPlayer) return;
+        const card = gameState.deck.splice(Math.floor(Math.random() * gameState.deck.length), 1)[0];
+        gameState.lastCardDrawn = card;
+        switch (card.value) {
+          case 'A':
+            gameState.currentHolders['A'] = ws.id;
+            break;
+          case 'Q':
+            gameState.currentHolders['Q'] = ws.id;
+            break;
+          case '5':
+            gameState.currentHolders['5'] = ws.id;
+            break;
+          default:
+            break;
         }
-    });
+        gameState.lastPlayer = ws.id;
+        gameState.nextPlayer =
+          gameState.players[
+            (gameState.players.findIndex((player) => player.id === ws.id) + 1) % gameState.players.length
+          ].id;
+        updateGameStatus();
+        broadcastGameState();
+      default:
+        break;
+    }
+  });
 
-    ws.on('close', () => {
-        clients.splice(clients.findIndex(client => client.id === ws.id), 1);
-        console.log(`client ${ws.id}: connection closed`);
-    });
+  ws.on('close', () => {
+    if (ws.id === gameState.nextPlayer) {
+      gameState.nextPlayer =
+        gameState.players[
+          (gameState.players.findIndex((player) => player.id === ws.id) + 1) % gameState.players.length
+        ];
+    }
+    clients.splice(
+      clients.findIndex((client) => client.id === ws.id),
+      1
+    );
+    gameState.players.splice(
+      gameState.players.findIndex((player) => player.id === ws.id),
+      1
+    );
+    console.log(`client ${ws.id}: connection closed`);
+    broadcastGameState();
+  });
 
-    ws.on('error', err => {
-        console.log(`client ${ws.id}: error: ${err.message}`);
-    });
+  ws.on('error', (err) => {
+    console.log(`client ${ws.id}: error: ${err.message}`);
+  });
 });
 
 wss.on('error', () => {
-    const msgObject = { error: "Server encountered an error" };
-    const msgString = JSON.stringify(msgObject);
-    clients.forEach(client => client.send(msgString));
+  gameState.status = GAME_ENDED_FROM_ERROR;
+  broadcastGameEnded('Server encountered an error');
 });
