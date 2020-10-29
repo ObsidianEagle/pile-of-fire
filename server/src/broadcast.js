@@ -7,5 +7,5 @@ export const broadcastGameState = (gameState, clients) => {
   };
   const msgString = JSON.stringify(msgObject);
   clients.forEach((client) => client.send(msgString));
-  console.log('updated game state broadcast to all clients');
+  console.debug('updated game state broadcast to all clients');
 };

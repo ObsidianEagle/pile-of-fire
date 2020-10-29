@@ -40,10 +40,10 @@ export const initialisePlayer = (playerInitRequest, gameState, ws) => {
   };
   updateGameStatus(gameState);
   ws.send(JSON.stringify(playerInitAck));
-  console.log(`client ${ws.id}: player initiated with name ${ws.name}`);
+  console.debug(`client ${ws.id}: player initiated with name ${ws.name}`);
 };
 
-export const drawCard = (gameState, ws, clients) => {
+export const drawCard = (gameState, ws) => {
   if (ws.id !== gameState.nextPlayer) return;
   const card = gameState.deck.splice(Math.floor(Math.random() * gameState.deck.length), 1)[0];
   gameState.lastCardDrawn = card;
@@ -78,9 +78,7 @@ export const drawCard = (gameState, ws, clients) => {
 export const removePlayer = (gameState, ws, clients) => {
   if (ws.id === gameState.nextPlayer) {
     gameState.nextPlayer =
-      gameState.players[
-        (gameState.players.findIndex((player) => player.id === ws.id) + 1) % gameState.players.length
-      ];
+      gameState.players[(gameState.players.findIndex((player) => player.id === ws.id) + 1) % gameState.players.length];
   }
 
   Object.keys(gameState.specialHolders).forEach((key) => {
@@ -94,5 +92,10 @@ export const removePlayer = (gameState, ws, clients) => {
     gameState.players.findIndex((player) => player.id === ws.id),
     1
   );
-  console.log(`client ${ws.id}: connection closed`);
-}
+  console.debug(`client ${ws.id}: connection closed`);
+};
+
+export const skipTurn = (gameState) => {
+  gameState.nextPlayer =
+    gameState.players[(gameState.players.findIndex((player) => player.id === ws.id) + 1) % gameState.players.length].id;
+};
