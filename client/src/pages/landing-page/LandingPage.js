@@ -2,9 +2,19 @@ import { useState } from 'react';
 import { Button, Container, Header, Input } from 'semantic-ui-react';
 import './LandingPage.scss';
 
-const LandingPage = ({ enterGame }) => {
+const LandingPage = ({ enterGame, location }) => {
+  let initialHost = '';
+  if (window.location.search.length) {
+    const queryParams = window.location.search
+      .substring(1)
+      .split('&')
+      .map(s => s.split('='));
+    const hostParam = queryParams.find(pair => pair[0] === 'host');
+    if (hostParam) initialHost = hostParam[1];
+  }
+
   const [name, setName] = useState('');
-  const [host, setHost] = useState('');
+  const [host, setHost] = useState(initialHost);
   return (
     <Container textAlign="center" className="landing-page">
       <Header className="main-header">Pile of Fire</Header>
