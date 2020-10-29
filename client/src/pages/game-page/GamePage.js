@@ -47,7 +47,7 @@ const GamePage = ({ playerId, gameState, setGameState }) => {
         <Grid.Column width={4}>
           <Card.Group>
             <Deck cardsRemaining={deck.length} />
-            <PlayerList players={players} />
+            <PlayerList players={players} nextUp={nextPlayer} />
             {Object.keys(specialHolders).map((key) =>
               specialHolders[key] ? (
                 <SpecialCardHolder
