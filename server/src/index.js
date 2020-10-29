@@ -1,12 +1,12 @@
 import WebSocket from 'ws';
 import { CHANGE_STATUS, DRAW_CARD, GAME_STATE, PLAYER_INIT, PLAYER_INIT_ACK } from './constants/messages.js';
-import { WAITING_FOR_PLAYERS, GAME_ENDED, GAME_ENDED_FROM_ERROR, IN_PROGRESS } from './constants/statuses.js';
+import { GAME_ENDED_FROM_ERROR, WAITING_FOR_PLAYERS, IN_PROGRESS } from './constants/statuses.js';
 
 const wss = new WebSocket.Server({ port: 8080 });
 const clients = [];
 let counter = 1;
 
-const populateDeck = (numberOfDecks) => {
+export const populateDeck = (numberOfDecks) => {
   const suits = ['HEARTS', 'SPADES', 'DIAMONDS', 'CLUBS'];
   const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
@@ -22,6 +22,16 @@ const populateDeck = (numberOfDecks) => {
   return deck;
 };
 
+export const updateGameStatus = () => {
+  if (!gameState.deck.length) {
+    gameState.status = GAME_ENDED;
+  } else if (gameState.players.length < 2) {
+    gameState.status = WAITING_FOR_PLAYERS;
+  } else {
+    gameState.status = IN_PROGRESS;
+  }
+};
+
 const gameState = {
   deck: populateDeck(1),
   status: WAITING_FOR_PLAYERS,
@@ -30,7 +40,7 @@ const gameState = {
   nextPlayer: null,
   players: [],
   mates: [],
-  currentHolders: {
+  specialHolders: {
     A: null,
     Q: null,
     5: null,
@@ -46,16 +56,6 @@ const broadcastGameState = () => {
   clients.forEach((client) => client.send(msgString));
   console.log('updated game state broadcast to all clients');
 };
-
-const updateGameStatus = () => {
-  if (!gameState.deck.length) {
-    gameState.status = GAME_ENDED;
-  } else if (gameState.players.length < 2) {
-    gameState.status = WAITING_FOR_PLAYERS;
-  } else {
-    gameState.status = IN_PROGRESS;
-  }
-}
 
 wss.on('connection', (ws) => {
   ws.id = counter++;
@@ -94,13 +94,22 @@ wss.on('connection', (ws) => {
         gameState.lastCardDrawn = card;
         switch (card.value) {
           case 'A':
-            gameState.currentHolders['A'] = ws.id;
+            gameState.specialHolders['A'] = {
+              player: ws.id,
+              card
+            };
             break;
           case 'Q':
-            gameState.currentHolders['Q'] = ws.id;
+            gameState.specialHolders['Q'] = {
+              player: ws.id,
+              card
+            };
             break;
           case '5':
-            gameState.currentHolders['5'] = ws.id;
+            gameState.specialHolders['5'] = {
+              player: ws.id,
+              card
+            };
             break;
           default:
             break;
@@ -124,6 +133,10 @@ wss.on('connection', (ws) => {
           (gameState.players.findIndex((player) => player.id === ws.id) + 1) % gameState.players.length
         ];
     }
+
+    Object.keys(gameState.specialHolders).forEach((key) => {
+      if (gameState.specialHolders[key] === ws.id) gameState.specialHolders[key] = null;
+    });
     clients.splice(
       clients.findIndex((client) => client.id === ws.id),
       1

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { PLAYER_INIT, PLAYER_INIT_ACK } from './constants/messages';
-import GamePage from './game-page/GamePage';
-import LandingPage from './landing-page/LandingPage';
+import GamePage from './pages/game-page/GamePage';
+import LandingPage from './pages/landing-page/LandingPage';
 
 const App = () => {
   const [playerId, setPlayerId] = useState(null);
