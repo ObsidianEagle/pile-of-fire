@@ -41,24 +41,28 @@ const GamePage = ({ playerId, gameState, setGameState }) => {
   return (
     <Container className="game-page">
       <Grid stackable>
-        <Grid.Column width={12}>
+        <Grid.Column width={10}>
           <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} />
         </Grid.Column>
-        <Grid.Column width={4}>
-          <Card.Group>
-            <Deck cardsRemaining={deck.length} />
-            <PlayerList players={players} nextUp={nextPlayer} />
-            {Object.keys(specialHolders).map((key) =>
-              specialHolders[key] ? (
-                <SpecialCardHolder
-                  playerName={findPlayerName(specialHolders[key].player)}
-                  card={specialHolders[key].card}
-                  key={key}
-                />
-              ) : null
-            )}
-            <DrawCard disabled={nextPlayer !== playerId} sendDrawCardMessage={sendDrawCardMessage} />
-          </Card.Group>
+        <Grid.Column width={6}>
+          <Grid stackable>
+            <Grid.Column width={8}>
+              {Object.keys(specialHolders).map((key) =>
+                specialHolders[key] ? (
+                  <SpecialCardHolder
+                    playerName={findPlayerName(specialHolders[key].player)}
+                    card={specialHolders[key].card}
+                    key={key}
+                  />
+                ) : null
+              )}
+            </Grid.Column>
+            <Grid.Column width={8}>
+              <Deck cardsRemaining={deck.length} />
+              <PlayerList players={players} nextUp={nextPlayer} />
+              <DrawCard disabled={nextPlayer !== playerId} sendDrawCardMessage={sendDrawCardMessage} />
+            </Grid.Column>
+          </Grid>
         </Grid.Column>
       </Grid>
     </Container>
