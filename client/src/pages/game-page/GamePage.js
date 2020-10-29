@@ -6,6 +6,7 @@ import Deck from '../../components/deck/Deck';
 import PlayerList from '../../components/player-list/PlayerList';
 import SpecialCardHolder from '../../components/special-card-holder/SpecialCardHolder';
 import DrawCard from '../../components/draw-card/DrawCard';
+import './GamePage.scss';
 
 const GamePage = ({ playerId, gameState, setGameState }) => {
   useEffect(() => {
@@ -38,12 +39,12 @@ const GamePage = ({ playerId, gameState, setGameState }) => {
   const findPlayerName = (id) => players.find((player) => player.id === id)?.name;
 
   return (
-    <Container>
+    <Container className="game-page">
       <Grid stackable>
-        <Grid.Column width={8}>
+        <Grid.Column width={12}>
           <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} />
         </Grid.Column>
-        <Grid.Column width={8}>
+        <Grid.Column width={4}>
           <Card.Group>
             <Deck cardsRemaining={deck.length} />
             <PlayerList players={players} />

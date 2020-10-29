@@ -2,7 +2,7 @@ import { Card } from 'semantic-ui-react';
 
 const PlayerList = ({ players }) => (
   <Card fluid>
-    <Card.Header>Players</Card.Header>
+    <Card.Header textAlign="center"><h4>Players</h4></Card.Header>
     <Card.Content>
       <ol>
         {players.map((player) => (

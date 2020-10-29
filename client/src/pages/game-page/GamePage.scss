@@ -1,0 +1,13 @@
+@import '../../styles/global';
+
+.ui.game-page {
+  margin-top: 2em;
+
+  h1 {
+    color: $primary-colour;
+  }
+
+  h4 {
+    margin: 0.5em;
+  }
+}

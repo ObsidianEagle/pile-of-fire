@@ -3,10 +3,12 @@ import PlayingCard from '../playing-card/PlayingCard';
 
 const Deck = ({ cardsRemaining }) => (
   <Card fluid>
-    <Card.Header>Deck</Card.Header>
-    <Card.Content>
+    <Card.Header textAlign="center"><h4>Deck</h4></Card.Header>
+    <Card.Content textAlign="center">
       <PlayingCard back />
-      <b>Remaining: {cardsRemaining}</b>
+      <div>
+        <b>Remaining: {cardsRemaining}</b>
+      </div>
     </Card.Content>
   </Card>
 );

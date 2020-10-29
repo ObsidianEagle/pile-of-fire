@@ -20,10 +20,12 @@ const SpecialCardHolder = ({ playerName, card }) => {
 
   return (
     <Card fluid>
-      <Card.Header>{title}</Card.Header>
-      <Card.Content>
+      <Card.Header textAlign="center"><h4>{title}</h4></Card.Header>
+      <Card.Content textAlign="center">
         <PlayingCard card={card} />
-        <b>{playerName}</b>
+        <div>
+          <b>{playerName}</b>
+        </div>
       </Card.Content>
     </Card>
   );
