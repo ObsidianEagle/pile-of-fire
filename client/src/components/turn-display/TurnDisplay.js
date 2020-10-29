@@ -9,7 +9,7 @@ const TurnDisplay = ({ playerName, card }) => {
 
   return (
     <Container textAlign="center">
-      <h3>{playerName} drew...</h3>
+      <h3>{playerName || "The last player"} drew...</h3>
       <PlayingCard card={card} large />
       <h1>{name}</h1>
       <h3>{description}</h3>

@@ -1,6 +1,8 @@
 import { GAME_STATE } from './constants/messages.js';
+import { checkGameEnded } from './game.js';
 
 export const broadcastGameState = (gameState, clients) => {
+  checkGameEnded(gameState);
   const msgObject = {
     type: GAME_STATE,
     payload: { gameState },
