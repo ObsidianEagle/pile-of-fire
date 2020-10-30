@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { PLAYER_INIT, PLAYER_INIT_ACK } from './constants/messages';
 import GamePage from './pages/game-page/GamePage';
 import LandingPage from './pages/landing-page/LandingPage';
+import './App.scss';
 
 const App = () => {
   const [playerId, setPlayerId] = useState(null);
@@ -34,6 +35,11 @@ const App = () => {
       ) : (
         <LandingPage enterGame={enterGame} />
       )}
+      <div className="main-footer">
+        <p>
+          Created by Alex King. View the source on <a href="https://github.com/ObsidianEagle/pile-of-fire">GitHub</a>.
+        </p>
+      </div>
     </div>
   );
 };

@@ -1,0 +1,18 @@
+@import './styles/global';
+
+.app {
+  height: 100%;
+}
+
+.main-footer {
+  position: absolute;
+  width: 100%;
+  padding: 1em 0;
+  bottom: 0;
+  color: $secondary-colour;
+  text-align: center;
+
+  a {
+    color: $primary-colour
+  }
+}
