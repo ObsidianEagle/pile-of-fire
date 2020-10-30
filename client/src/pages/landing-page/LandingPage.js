@@ -23,6 +23,7 @@ const LandingPage = ({ enterGame, location }) => {
         value={name}
         onChange={(e) => setName(e.target.value)}
         className="form-element form-input"
+        maxLength={12}
       />
       <Input
         label="Host Address"

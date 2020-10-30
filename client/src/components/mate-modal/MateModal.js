@@ -8,6 +8,8 @@ const MateModal = ({ playerId, players, mates, isOpen, chooseMate }) => {
     if (existingPairing) availablePlayers = availablePlayers.filter((player) => !existingPairing.includes(player.id));
   }
 
+  if (!availablePlayers) chooseMate(null);
+
   return (
     <Modal open={isOpen}>
       <Modal.Header>Pick a player to be your mate</Modal.Header>

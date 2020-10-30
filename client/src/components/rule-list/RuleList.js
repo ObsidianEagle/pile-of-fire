@@ -3,7 +3,7 @@ import { Card } from 'semantic-ui-react';
 const RuleList = ({ rules }) => (
   <Card fluid>
     <Card.Header textAlign="center">
-      <h4>Rules</h4>
+      <h4>Custom Rules</h4>
     </Card.Header>
     <Card.Content>
       <ul>
