@@ -1,18 +1,45 @@
+import {} from 'dotenv/config.js';
+import fs from 'fs';
+import https from 'https';
 import readline from 'readline';
 import WebSocket from 'ws';
 import { broadcastGameState } from './broadcast.js';
-import { EXIT, HELP, REMOVE_PLAYER, SET_DECKS, SKIP, UPDATE, RESTART } from './constants/commands.js';
+import { EXIT, HELP, REMOVE_PLAYER, RESTART, SET_DECKS, SKIP, UPDATE } from './constants/commands.js';
 import { CHANGE_STATUS, DRAW_CARD, PLAYER_CHOICE_RESPONSE, PLAYER_INIT, RESTART_GAME } from './constants/messages.js';
 import { GAME_ENDED_FROM_ERROR, IN_PROGRESS } from './constants/statuses.js';
-import { addMates, changeRules, drawCard, initialisePlayer, populateDeck, removePlayer, restartGame, skipTurn } from './game.js';
+import {
+  addMates,
+  changeRules,
+  drawCard,
+  initialisePlayer,
+  populateDeck,
+  removePlayer,
+  restartGame,
+  skipTurn
+} from './game.js';
+
+// SERVER
+let PORT = 8080;
+if (process.argv.length > 2) PORT = process.argv[2];
+if (process.env.PORT) PORT = process.env.PORT;
+
+const wssConfig = {};
+let httpsServer;
+if (process.env.USE_HTTPS_SERVER === 'true') {
+  httpsServer = https.createServer({
+    cert: fs.readFileSync('src/config/server.crt'),
+    key: fs.readFileSync('src/config/server.key')
+  });
+  wssConfig.server = httpsServer;
+} else {
+  wssConfig.port = PORT;
+}
+const wss = new WebSocket.Server(wssConfig);
 
 // GLOBALS
-const PORT = process.argv.length > 2 ? process.argv[2] : 8080;
-const wss = new WebSocket.Server({ port: PORT });
 const clients = [];
 let numberOfDecks = 1;
 let counter = 1;
-
 const gameState = {
   deck: populateDeck(numberOfDecks),
   status: IN_PROGRESS,
@@ -25,8 +52,8 @@ const gameState = {
   specialHolders: {
     A: null,
     Q: null,
-    5: null,
-  },
+    5: null
+  }
 };
 
 // WEBSOCKET LISTENERS
@@ -105,20 +132,20 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-console.info(`Server running on port ${wss.address().port}`);
+console.info(`Server running on port ${PORT}`);
 console.info('Type `start` to begin the game');
 console.info('Type `help` to see a list of commands.');
 
-rl.on("line", input => {
+rl.on('line', (input) => {
   const inputSplit = input.split(' ');
   const command = inputSplit[0].toLowerCase();
   const parameter = input.split.length > 1 ? inputSplit[1] : null;
   switch (command) {
     case HELP:
       console.info('Available commands:');
-      console.info('  `skip` - skip the current player\'s turn.');
+      console.info("  `skip` - skip the current player's turn.");
       console.info('  `update` - broadcast the current game state to all players.');
-      console.info('  `restart` - restart the game.')
+      console.info('  `restart` - restart the game.');
       console.info('  `set-decks <number_of_decks>` - update the number of decks in play.');
       console.info('  `remove-player <player_id>` - remove a player from the game. [TODO - Not Yet Implemented]');
       console.info('  `exit` - close the server.');
@@ -158,3 +185,7 @@ rl.on("line", input => {
       break;
   }
 });
+
+if (httpsServer) {
+  httpsServer.listen(PORT);
+}

@@ -4,12 +4,14 @@ import GamePage from './pages/game-page/GamePage';
 import LandingPage from './pages/landing-page/LandingPage';
 import './App.scss';
 
+const PROTOCOL = process.env.REACT_APP_USE_WSS === 'true' ? 'wss' : 'ws';
+
 const App = () => {
   const [playerId, setPlayerId] = useState(null);
   const [gameState, setGameState] = useState(null);
 
   const enterGame = (host, name) => {
-    const ws = new WebSocket(`wss://${host}`);
+    const ws = new WebSocket(`${PROTOCOL}://${host}`);
     window.ws = ws;
 
     ws.onopen = () => ws.send(JSON.stringify({ type: PLAYER_INIT, payload: { name: name } }));
