@@ -39,7 +39,7 @@ const wss = new WebSocket.Server(wssConfig);
 // GLOBALS
 const clients = [];
 let numberOfDecks = 1;
-let counter = 1;
+let idCounter = 1;
 const gameState = {
   deck: populateDeck(numberOfDecks),
   status: IN_PROGRESS,
@@ -58,7 +58,7 @@ const gameState = {
 
 // WEBSOCKET LISTENERS
 wss.on('connection', (ws) => {
-  ws.id = counter++;
+  ws.id = idCounter++;
   clients.push(ws);
 
   ws.on('open', () => {
@@ -110,6 +110,7 @@ wss.on('connection', (ws) => {
 
     if (!gameState.players.length) {
       restartGame(gameState, numberOfDecks);
+      idCounter = 1;
       console.debug(`no players remaining, game state reset`);
     }
 
