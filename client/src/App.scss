@@ -5,12 +5,16 @@
 }
 
 .main-footer {
-  position: relative;
+  position: absolute;
   width: 100%;
   padding: 1em 0;
   bottom: 0;
   color: $secondary-colour;
   text-align: center;
+
+  @media (max-width: $mobile-max-width) {
+    position: sticky;
+  }
 
   a {
     color: $primary-colour
