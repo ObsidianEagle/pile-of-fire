@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Container, Grid } from 'semantic-ui-react';
 import Deck from '../../components/deck/Deck';
-import DrawCard from '../../components/draw-card/DrawCard';
+import GameButtons from '../../components/game-buttons/GameButtons';
 import MateList from '../../components/mate-list/MateList';
 import MateModal from '../../components/mate-modal/MateModal';
 import PlayerList from '../../components/player-list/PlayerList';
@@ -10,8 +10,14 @@ import RuleModal from '../../components/rule-modal/RuleModal';
 import SpecialCardHolder from '../../components/special-card-holder/SpecialCardHolder';
 import StatusMessage from '../../components/status-message/StatusMessage';
 import TurnDisplay from '../../components/turn-display/TurnDisplay';
-import { DRAW_CARD, GAME_STATE, PLAYER_CHOICE_REQUEST, PLAYER_CHOICE_RESPONSE } from '../../constants/messages';
-import { IN_PROGRESS } from '../../constants/statuses';
+import {
+  DRAW_CARD,
+  GAME_STATE,
+  PLAYER_CHOICE_REQUEST,
+  PLAYER_CHOICE_RESPONSE,
+  RESTART_GAME
+} from '../../constants/messages';
+import { GAME_ENDED, GAME_ENDED_FROM_ERROR, IN_PROGRESS } from '../../constants/statuses';
 import './GamePage.scss';
 
 const GamePage = ({ playerId, gameState, setGameState }) => {
@@ -48,13 +54,12 @@ const GamePage = ({ playerId, gameState, setGameState }) => {
 
     window.ws.onclose = () => {
       setConnectionError('Game connection closed by server');
-      setTimeout(window.location.reload.bind(window.location), 5000)
-    }
+      setTimeout(window.location.reload.bind(window.location), 5000);
+    };
   }, [setGameState]);
 
-  // For debug purposes
   useEffect(() => {
-    console.log(gameState);
+    console.debug(gameState);
   }, [gameState]);
 
   if (!gameState) return null;
@@ -64,6 +69,14 @@ const GamePage = ({ playerId, gameState, setGameState }) => {
   const sendDrawCardMessage = () => {
     const msgObject = {
       type: DRAW_CARD
+    };
+    const msgString = JSON.stringify(msgObject);
+    window.ws.send(msgString);
+  };
+
+  const sendRestartGameMessage = () => {
+    const msgObject = {
+      type: RESTART_GAME
     };
     const msgString = JSON.stringify(msgObject);
     window.ws.send(msgString);
@@ -122,9 +135,11 @@ const GamePage = ({ playerId, gameState, setGameState }) => {
             <Grid.Column width={8}>
               <Deck cardsRemaining={deck.length} />
               <PlayerList players={players} nextUp={nextPlayer} />
-              <DrawCard
-                disabled={nextPlayer !== playerId || status !== IN_PROGRESS}
+              <GameButtons
+                drawButtonDisabled={nextPlayer !== playerId || status !== IN_PROGRESS}
+                restartButtonVisible={status === GAME_ENDED || status === GAME_ENDED_FROM_ERROR}
                 sendDrawCardMessage={sendDrawCardMessage}
+                sendRestartGameMessage={sendRestartGameMessage}
               />
               {mates.length ? <MateList mates={mates} players={players} /> : null}
             </Grid.Column>

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Button, Modal } from 'semantic-ui-react';
 
 const MateModal = ({ playerId, players, mates, isOpen, chooseMate }) => {
@@ -8,7 +9,9 @@ const MateModal = ({ playerId, players, mates, isOpen, chooseMate }) => {
     if (existingPairing) availablePlayers = availablePlayers.filter((player) => !existingPairing.includes(player.id));
   }
 
-  if (!availablePlayers) chooseMate(null);
+  useEffect(() => {
+    if (isOpen && !availablePlayers.length) chooseMate(null);
+  }, [isOpen, availablePlayers.length, chooseMate]);
 
   return (
     <Modal open={isOpen}>

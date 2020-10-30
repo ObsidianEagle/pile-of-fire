@@ -1,5 +1,5 @@
 import { PLAYER_CHOICE_REQUEST, PLAYER_INIT_ACK } from './constants/messages.js';
-import { GAME_ENDED, WAITING_FOR_PLAYER } from './constants/statuses.js';
+import { GAME_ENDED, WAITING_FOR_PLAYER, IN_PROGRESS } from './constants/statuses.js';
 
 export const populateDeck = (numberOfDecks) => {
   const suits = ['HEARTS', 'SPADES', 'DIAMONDS', 'CLUBS'];
@@ -33,7 +33,6 @@ export const initialisePlayer = (playerInitRequest, gameState, ws) => {
     payload: { id: ws.id, gameState }
   };
   ws.send(JSON.stringify(playerInitAck));
-  console.debug(`client ${ws.id}: player initiated with name ${ws.name}`);
 };
 
 export const requestPlayerChoice = (gameState, ws) => {
@@ -46,7 +45,7 @@ export const requestPlayerChoice = (gameState, ws) => {
   };
   const msgString = JSON.stringify(msgObject);
   ws.send(msgString);
-  console.debug(`player choice request sent to player id ${ws.id}`);
+  console.debug(`client ${ws.id}: player choice request sent`);
 };
 
 export const drawCard = (gameState, ws) => {
@@ -118,7 +117,6 @@ export const removePlayer = (gameState, ws, clients) => {
     gameState.players.findIndex((player) => player.id === ws.id),
     1
   );
-  console.debug(`client ${ws.id}: connection closed`);
 };
 
 export const skipTurn = (gameState) => {
@@ -158,4 +156,19 @@ export const changeRules = (chosenRule, gameState) => {
   } else {
     gameState.rules.push(chosenRule);
   }
+};
+
+export const restartGame = (gameState, numberOfDecks) => {
+  gameState.deck = populateDeck(numberOfDecks);
+  gameState.status = IN_PROGRESS;
+  gameState.lastCardDrawn = null;
+  gameState.lastPlayer = null;
+  gameState.nextPlayer = gameState.players.length > 0 ? gameState.players[0].id : null;
+  gameState.mates.splice(0, gameState.mates.length);
+  gameState.rules.splice(0, gameState.rules.length);
+  gameState.specialHolders = {
+    A: null,
+    Q: null,
+    5: null
+  };
 };

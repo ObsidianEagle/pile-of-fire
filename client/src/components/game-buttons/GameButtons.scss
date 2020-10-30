@@ -1,8 +1,9 @@
 @import '../../styles/global';
 
-.ui.draw-card {
-  .draw-card-button {
+.ui.game-buttons-card {
+  .game-button {
     padding: 1em 2em;
+    margin: 0.5em;
     background-color: $primary-colour;
     color: white;
     width: fit-content;

@@ -1,10 +1,10 @@
 import readline from 'readline';
 import WebSocket from 'ws';
 import { broadcastGameState } from './broadcast.js';
-import { EXIT, HELP, REMOVE_PLAYER, SET_DECKS, SKIP, UPDATE } from './constants/commands.js';
-import { CHANGE_STATUS, DRAW_CARD, PLAYER_CHOICE_RESPONSE, PLAYER_INIT } from './constants/messages.js';
+import { EXIT, HELP, REMOVE_PLAYER, SET_DECKS, SKIP, UPDATE, RESTART } from './constants/commands.js';
+import { CHANGE_STATUS, DRAW_CARD, PLAYER_CHOICE_RESPONSE, PLAYER_INIT, RESTART_GAME } from './constants/messages.js';
 import { GAME_ENDED_FROM_ERROR, IN_PROGRESS } from './constants/statuses.js';
-import { addMates, changeRules, drawCard, initialisePlayer, populateDeck, removePlayer, skipTurn } from './game.js';
+import { addMates, changeRules, drawCard, initialisePlayer, populateDeck, removePlayer, restartGame, skipTurn } from './game.js';
 
 // GLOBALS
 const PORT = process.argv.length > 2 ? process.argv[2] : 8080;
@@ -44,6 +44,7 @@ wss.on('connection', (ws) => {
     switch (req.type) {
       case PLAYER_INIT:
         initialisePlayer(req.payload, gameState, ws);
+        console.debug(`client ${ws.id}: player initialised with name ${ws.name}`);
         broadcastGameState(gameState, clients);
         break;
       case CHANGE_STATUS:
@@ -52,17 +53,23 @@ wss.on('connection', (ws) => {
         broadcastGameState(gameState, clients);
       case DRAW_CARD:
         drawCard(gameState, ws);
+        console.debug(`client ${ws.id}: drew card`);
+        broadcastGameState(gameState, clients);
+        break;
+      case RESTART_GAME:
+        restartGame(gameState, numberOfDecks);
+        console.debug(`client ${ws.id}: restarted game`);
         broadcastGameState(gameState, clients);
         break;
       case PLAYER_CHOICE_RESPONSE:
         if (gameState.lastPlayer !== ws.id) break;
         if (req.payload.mateId && gameState.lastCardDrawn.value === '8') {
           addMates(ws.id, req.payload.mateId, gameState);
-          gameState.status = IN_PROGRESS;
         } else if (req.payload.rule && gameState.lastCardDrawn.value === 'J') {
           changeRules(req.payload.rule, gameState);
-          gameState.status = IN_PROGRESS;
         }
+        gameState.status = IN_PROGRESS;
+        console.debug(`client ${ws.id}: player choice received`);
         broadcastGameState(gameState, clients);
         break;
       default:
@@ -72,6 +79,13 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     removePlayer(gameState, ws, clients);
+    console.debug(`client ${ws.id}: connection closed, removed from game`);
+
+    if (!gameState.players.length) {
+      restartGame(gameState, numberOfDecks);
+      console.debug(`no players remaining, game state reset`);
+    }
+
     broadcastGameState(gameState, clients);
   });
 
@@ -104,6 +118,7 @@ rl.on("line", input => {
       console.info('Available commands:');
       console.info('  `skip` - skip the current player\'s turn.');
       console.info('  `update` - broadcast the current game state to all players.');
+      console.info('  `restart` - restart the game.')
       console.info('  `set-decks <number_of_decks>` - update the number of decks in play.');
       console.info('  `remove-player <player_id>` - remove a player from the game. [TODO - Not Yet Implemented]');
       console.info('  `exit` - close the server.');
@@ -121,6 +136,11 @@ rl.on("line", input => {
     case UPDATE:
       broadcastGameState(gameState, clients);
       console.info('Broadcasted game state to all players');
+      break;
+    case RESTART:
+      restartGame(gameState, numberOfDecks);
+      broadcastGameState(gameState, clients);
+      console.info('Game restarted.');
       break;
     case SET_DECKS:
       if (!parameter || isNaN(parseInt(parameter))) {

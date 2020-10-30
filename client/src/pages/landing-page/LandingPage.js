@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button, Container, Header, Input } from 'semantic-ui-react';
 import './LandingPage.scss';
 
-const LandingPage = ({ enterGame, location }) => {
+const LandingPage = ({ enterGame }) => {
   let initialHost = '';
   if (window.location.search.length) {
     const queryParams = window.location.search
