@@ -9,7 +9,7 @@ const App = () => {
   const [gameState, setGameState] = useState(null);
 
   const enterGame = (host, name) => {
-    const ws = new WebSocket(`ws://${host}`);
+    const ws = new WebSocket(`wss://${host}`);
     window.ws = ws;
 
     ws.onopen = () => ws.send(JSON.stringify({ type: PLAYER_INIT, payload: { name: name } }));
