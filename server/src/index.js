@@ -1,9 +1,9 @@
 import readline from 'readline';
 import WebSocket from 'ws';
 import { broadcastGameState } from './broadcast.js';
-import { EXIT, HELP, REMOVE_PLAYER, SET_DECKS, SKIP, START, UPDATE } from './constants/commands.js';
+import { EXIT, HELP, REMOVE_PLAYER, SET_DECKS, SKIP, UPDATE } from './constants/commands.js';
 import { CHANGE_STATUS, DRAW_CARD, PLAYER_CHOICE_RESPONSE, PLAYER_INIT } from './constants/messages.js';
-import { GAME_ENDED_FROM_ERROR, IN_PROGRESS, WAITING_TO_START } from './constants/statuses.js';
+import { GAME_ENDED_FROM_ERROR, IN_PROGRESS } from './constants/statuses.js';
 import { addMates, changeRules, drawCard, initialisePlayer, populateDeck, removePlayer, skipTurn } from './game.js';
 
 // GLOBALS
@@ -15,7 +15,7 @@ let counter = 1;
 
 const gameState = {
   deck: populateDeck(numberOfDecks),
-  status: WAITING_TO_START,
+  status: IN_PROGRESS,
   lastCardDrawn: null,
   lastPlayer: null,
   nextPlayer: null,
@@ -102,17 +102,11 @@ rl.on("line", input => {
   switch (command) {
     case HELP:
       console.info('Available commands:');
-      console.info('  `start` - set the game to start.');
       console.info('  `skip` - skip the current player\'s turn.');
       console.info('  `update` - broadcast the current game state to all players.');
       console.info('  `set-decks <number_of_decks>` - update the number of decks in play.');
       console.info('  `remove-player <player_id>` - remove a player from the game. [TODO - Not Yet Implemented]');
       console.info('  `exit` - close the server.');
-      break;
-    case START:
-      gameState.status = IN_PROGRESS;
-      broadcastGameState(gameState, clients);
-      console.info('Game started.');
       break;
     case SKIP:
       console.info(`Skipping the turn of player id ${gameState.nextPlayer}`);
