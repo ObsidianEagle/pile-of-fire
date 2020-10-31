@@ -123,7 +123,7 @@ wss.on('connection', (ws) => {
 });
 
 wss.on('error', () => {
-  gameState.status = GAME_ENDED_FROM_ERROR;
+  //gameState.status = GAME_ENDED_FROM_ERROR;
   console.debug('Server encountered an error');
 });
 
