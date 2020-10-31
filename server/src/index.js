@@ -187,6 +187,9 @@ rl.on('line', (input) => {
   }
 });
 
+// Hotfix for idle connections
+setInterval(() => broadcastGameState(gameState, clients), 20000);
+
 if (httpsServer) {
   httpsServer.listen(PORT);
 }
