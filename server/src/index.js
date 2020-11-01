@@ -5,7 +5,14 @@ import readline from 'readline';
 import WebSocket from 'ws';
 import { broadcastGameState } from './broadcast.js';
 import { EXIT, HELP, REMOVE_PLAYER, RESTART, SET_DECKS, SKIP, UPDATE } from './constants/commands.js';
-import { CHANGE_STATUS, DRAW_CARD, PLAYER_CHOICE_RESPONSE, PLAYER_INIT, RESTART_GAME } from './constants/messages.js';
+import {
+  CHANGE_STATUS,
+  DRAW_CARD,
+  PLAYER_CHOICE_RESPONSE,
+  PLAYER_INIT,
+  RESTART_GAME,
+  SERVER_ERROR
+} from './constants/messages.js';
 import { GAME_ENDED_FROM_ERROR, IN_PROGRESS } from './constants/statuses.js';
 import {
   addMates,
@@ -35,6 +42,20 @@ if (process.env.USE_HTTPS_SERVER === 'true') {
   wssConfig.port = PORT;
 }
 const wss = new WebSocket.Server(wssConfig);
+
+const sendServerError = (errorMessage, clients) => {
+  const msgObject = {
+    type: SERVER_ERROR,
+    payload: {
+      errorMessage
+    }
+  };
+  const msgString = JSON.stringify(msgObject);
+  clients.forEach((client) => client.send(msgString));
+  console.debug(
+    `server error with message ${errorMessage} sent to client(s) ${clients.map((client) => client.id).join()}`
+  );
+};
 
 // GLOBALS
 const clients = [];
@@ -70,6 +91,15 @@ wss.on('connection', (ws) => {
     console.log(req);
     switch (req.type) {
       case PLAYER_INIT:
+        const duplicateName = gameState.players.find((player) => player.name === req.payload.name);
+        if (duplicateName) {
+          sendServerError(
+            `Player with name "${req.payload.name}" has already joined - please choose a different name`,
+            [ws]
+          );
+          break;
+        }
+
         initialisePlayer(req.payload, gameState, ws);
         console.debug(`client ${ws.id}: player initialised with name ${ws.name}`);
         broadcastGameState(gameState, clients);
@@ -122,9 +152,8 @@ wss.on('connection', (ws) => {
   });
 });
 
-wss.on('error', () => {
-  //gameState.status = GAME_ENDED_FROM_ERROR;
-  console.debug('Server encountered an error');
+wss.on('error', (err) => {
+  console.debug(`server encountered an error: ${err.name} - ${err.message}`);
 });
 
 // SERVER CLI

@@ -89,6 +89,14 @@ export const drawCard = (gameState, ws) => {
 };
 
 export const removePlayer = (gameState, ws, clients) => {
+  clients.splice(
+    clients.findIndex((client) => client.id === ws.id),
+    1
+  );
+
+  const isPlayer = gameState.players.find((player) => player.id === ws.id);
+  if (!isPlayer) return;
+
   if (ws.id === gameState.nextPlayer) {
     gameState.nextPlayer =
       gameState.players[(gameState.players.findIndex((player) => player.id === ws.id) + 1) % gameState.players.length];
@@ -109,10 +117,6 @@ export const removePlayer = (gameState, ws, clients) => {
   Object.keys(gameState.specialHolders).forEach((key) => {
     if (gameState.specialHolders[key] === ws.id) gameState.specialHolders[key] = null;
   });
-  clients.splice(
-    clients.findIndex((client) => client.id === ws.id),
-    1
-  );
   gameState.players.splice(
     gameState.players.findIndex((player) => player.id === ws.id),
     1

@@ -1,20 +1,50 @@
 import { useState } from 'react';
 import { Button, Container, Header, Input } from 'semantic-ui-react';
+import StatusMessage from '../../components/status-message/StatusMessage';
+import { PLAYER_INIT, PLAYER_INIT_ACK, SERVER_ERROR } from '../../constants/messages';
 import './LandingPage.scss';
 
-const LandingPage = ({ enterGame }) => {
+const PROTOCOL = process.env.REACT_APP_USE_WSS === 'true' ? 'wss' : 'ws';
+
+const LandingPage = ({ setPlayerId, setGameState, setWs }) => {
   let initialHost = '';
   if (window.location.search.length) {
     const queryParams = window.location.search
       .substring(1)
       .split('&')
-      .map(s => s.split('='));
-    const hostParam = queryParams.find(pair => pair[0] === 'host');
+      .map((s) => s.split('='));
+    const hostParam = queryParams.find((pair) => pair[0] === 'host');
     if (hostParam) initialHost = hostParam[1];
   }
 
   const [name, setName] = useState('');
   const [host, setHost] = useState(initialHost);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const enterGame = (host, name) => {
+    const ws = new WebSocket(`${PROTOCOL}://${host}`);
+    setWs(ws);
+
+    ws.onopen = () => ws.send(JSON.stringify({ type: PLAYER_INIT, payload: { name: name } }));
+
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      switch (msg.type) {
+        case PLAYER_INIT_ACK:
+          setGameState(msg.payload.gameState);
+          setPlayerId(msg.payload.id);
+          break;
+        case SERVER_ERROR:
+          setErrorMessage(msg.payload.errorMessage);
+          ws.close();
+          break;
+        default:
+          console.log(msg);
+          break;
+      }
+    };
+  };
+
   return (
     <Container textAlign="center" className="landing-page">
       <Header className="main-header">Pile of Fire</Header>
@@ -38,6 +68,7 @@ const LandingPage = ({ enterGame }) => {
       >
         Enter Game
       </Button>
+      {errorMessage.length > 0 && <StatusMessage message={errorMessage} />}
     </Container>
   );
 };

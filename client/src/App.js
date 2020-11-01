@@ -1,41 +1,19 @@
 import { useState } from 'react';
-import { PLAYER_INIT, PLAYER_INIT_ACK } from './constants/messages';
+import './App.scss';
 import GamePage from './pages/game-page/GamePage';
 import LandingPage from './pages/landing-page/LandingPage';
-import './App.scss';
-
-const PROTOCOL = process.env.REACT_APP_USE_WSS === 'true' ? 'wss' : 'ws';
 
 const App = () => {
   const [playerId, setPlayerId] = useState(null);
   const [gameState, setGameState] = useState(null);
-
-  const enterGame = (host, name) => {
-    const ws = new WebSocket(`${PROTOCOL}://${host}`);
-    window.ws = ws;
-
-    ws.onopen = () => ws.send(JSON.stringify({ type: PLAYER_INIT, payload: { name: name } }));
-
-    ws.onmessage = (e) => {
-      const msg = JSON.parse(e.data);
-      switch (msg.type) {
-        case PLAYER_INIT_ACK:
-          setGameState(msg.payload.gameState);
-          setPlayerId(msg.payload.id);
-          break;
-        default:
-          console.log(msg);
-          break;
-      }
-    };
-  };
+  const [ws, setWs] = useState(null);
 
   return (
     <div className="App">
       {playerId >= 0 && gameState ? (
-        <GamePage playerId={playerId} gameState={gameState} setGameState={setGameState} />
+        <GamePage playerId={playerId} gameState={gameState} ws={ws} setGameState={setGameState} />
       ) : (
-        <LandingPage enterGame={enterGame} />
+        <LandingPage setPlayerId={setPlayerId} setGameState={setGameState} setWs={setWs} />
       )}
       <div className="main-footer">
         <p>

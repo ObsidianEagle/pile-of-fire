@@ -20,13 +20,13 @@ import {
 import { GAME_ENDED, GAME_ENDED_FROM_ERROR, IN_PROGRESS } from '../../constants/statuses';
 import './GamePage.scss';
 
-const GamePage = ({ playerId, gameState, setGameState }) => {
+const GamePage = ({ playerId, gameState, ws, setGameState }) => {
   const [showMateModal, setShowMateModal] = useState(false);
   const [showRuleModal, setShowRuleModal] = useState(false);
   const [connectionError, setConnectionError] = useState('');
 
   useEffect(() => {
-    window.ws.onmessage = (e) => {
+    ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
       switch (msg.type) {
         case GAME_STATE:
@@ -52,11 +52,11 @@ const GamePage = ({ playerId, gameState, setGameState }) => {
       }
     };
 
-    window.ws.onclose = () => {
+    ws.onclose = () => {
       setConnectionError('Game connection closed by server');
       setTimeout(window.location.reload.bind(window.location), 5000);
     };
-  }, [setGameState]);
+  }, [setGameState, ws]);
 
   useEffect(() => {
     console.debug(gameState);
@@ -71,7 +71,7 @@ const GamePage = ({ playerId, gameState, setGameState }) => {
       type: DRAW_CARD
     };
     const msgString = JSON.stringify(msgObject);
-    window.ws.send(msgString);
+    ws.send(msgString);
   };
 
   const sendRestartGameMessage = () => {
@@ -79,7 +79,7 @@ const GamePage = ({ playerId, gameState, setGameState }) => {
       type: RESTART_GAME
     };
     const msgString = JSON.stringify(msgObject);
-    window.ws.send(msgString);
+    ws.send(msgString);
   };
 
   const chooseMate = (mateId) => {
@@ -90,7 +90,7 @@ const GamePage = ({ playerId, gameState, setGameState }) => {
       }
     };
     const msgString = JSON.stringify(msgObject);
-    window.ws.send(msgString);
+    ws.send(msgString);
     setShowMateModal(false);
   };
 
@@ -102,7 +102,7 @@ const GamePage = ({ playerId, gameState, setGameState }) => {
       }
     };
     const msgString = JSON.stringify(msgObject);
-    window.ws.send(msgString);
+    ws.send(msgString);
     setShowRuleModal(false);
   };
 
@@ -115,7 +115,7 @@ const GamePage = ({ playerId, gameState, setGameState }) => {
       <Grid stackable>
         <Grid.Column width={10}>
           <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} />
-          <StatusMessage playerName={findPlayerName(lastPlayer)} status={status} overrideMessage={connectionError} />
+          <StatusMessage playerName={findPlayerName(lastPlayer)} status={status} message={connectionError} />
           <br />
           {rules.length ? <RuleList rules={rules} /> : null}
         </Grid.Column>

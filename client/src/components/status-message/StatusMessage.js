@@ -1,7 +1,7 @@
 import { Message } from 'semantic-ui-react';
 import { WAITING_FOR_PLAYER, GAME_ENDED, GAME_ENDED_FROM_ERROR, WAITING_TO_START } from '../../constants/statuses';
 
-const StatusMessage = ({ status, playerName, overrideMessage }) => {
+const StatusMessage = ({ status, playerName, message }) => {
   let messageText = '';
   const messageType = {
     info: false,
@@ -30,8 +30,8 @@ const StatusMessage = ({ status, playerName, overrideMessage }) => {
       break;
   }
 
-  if (!messageText.length) return null;
-  if (overrideMessage.length) return <Message negative>{overrideMessage}</Message>
+  if (!messageText.length && !message.length) return null;
+  if (message.length) return <Message negative>{message}</Message>
   return <Message {...messageType}>{messageText}</Message>;
 };
 
