@@ -117,7 +117,7 @@ export const removePlayer = (gameState, ws, clients) => {
   }
 
   Object.keys(gameState.specialHolders).forEach((key) => {
-    if (gameState.specialHolders[key] === ws.id) gameState.specialHolders[key] = null;
+    if (gameState.specialHolders[key].player === ws.id) gameState.specialHolders[key] = null;
   });
   gameState.players.splice(
     gameState.players.findIndex((player) => player.id === ws.id),
