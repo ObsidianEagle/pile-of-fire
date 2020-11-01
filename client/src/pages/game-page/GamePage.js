@@ -24,6 +24,11 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
   const [showMateModal, setShowMateModal] = useState(false);
   const [showRuleModal, setShowRuleModal] = useState(false);
   const [connectionError, setConnectionError] = useState('');
+  const [mobileWidth, setMobileWidth] = useState(false);
+
+  useEffect(() => {
+    window.addEventListener('resize', () => setMobileWidth(window.innerWidth < 600));
+  }, [setMobileWidth])
 
   useEffect(() => {
     ws.onmessage = (e) => {
@@ -108,48 +113,83 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
 
   const findPlayerName = (id) => players.find((player) => player.id === id)?.name;
 
+  const desktopView = (
+    <Grid stackable>
+      <Grid.Column width={10}>
+        <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} />
+        <StatusMessage playerName={findPlayerName(lastPlayer)} status={status} message={connectionError} />
+        {rules.length ? <RuleList rules={rules} /> : null}
+      </Grid.Column>
+      <Grid.Column width={6}>
+        <Grid stackable>
+          <Grid.Column width={8}>
+            {Object.keys(specialHolders).map((key) =>
+              specialHolders[key] ? (
+                <SpecialCardHolder
+                  playerName={findPlayerName(specialHolders[key].player)}
+                  card={specialHolders[key].card}
+                  key={key}
+                />
+              ) : null
+            )}
+          </Grid.Column>
+          <Grid.Column width={8}>
+            <Deck cardsRemaining={deck.length} />
+            <PlayerList
+              players={players}
+              nextPlayer={nextPlayer}
+              lastPlayer={lastPlayer}
+              thisPlayerName={findPlayerName(playerId)}
+            />
+            <GameButtons
+              drawButtonDisabled={nextPlayer !== playerId || status !== IN_PROGRESS}
+              restartButtonVisible={status === GAME_ENDED || status === GAME_ENDED_FROM_ERROR}
+              sendDrawCardMessage={sendDrawCardMessage}
+              sendRestartGameMessage={sendRestartGameMessage}
+            />
+            {mates.length ? <MateList mates={mates} players={players} /> : null}
+          </Grid.Column>
+        </Grid>
+      </Grid.Column>
+    </Grid>
+  );
+
+  const mobileView = (
+    <>
+      <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} />
+      <StatusMessage playerName={findPlayerName(lastPlayer)} status={status} message={connectionError} />
+      {rules.length ? <RuleList rules={rules} /> : null}
+      {Object.keys(specialHolders).map((key) =>
+        specialHolders[key] ? (
+          <SpecialCardHolder
+            playerName={findPlayerName(specialHolders[key].player)}
+            card={specialHolders[key].card}
+            key={key}
+          />
+        ) : null
+      )}
+      <Deck cardsRemaining={deck.length} />
+      <PlayerList
+        players={players}
+        nextPlayer={nextPlayer}
+        lastPlayer={lastPlayer}
+        thisPlayerName={findPlayerName(playerId)}
+      />
+      <GameButtons
+        drawButtonDisabled={nextPlayer !== playerId || status !== IN_PROGRESS}
+        restartButtonVisible={status === GAME_ENDED || status === GAME_ENDED_FROM_ERROR}
+        sendDrawCardMessage={sendDrawCardMessage}
+        sendRestartGameMessage={sendRestartGameMessage}
+      />
+      {mates.length ? <MateList mates={mates} players={players} /> : null}
+    </>
+  );
+
   return (
     <Container className="game-page">
       <MateModal playerId={playerId} players={players} mates={mates} chooseMate={chooseMate} isOpen={showMateModal} />
       <RuleModal rules={rules} chooseRule={chooseRule} isOpen={showRuleModal} />
-      <Grid stackable>
-        <Grid.Column width={10}>
-          <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} />
-          <StatusMessage playerName={findPlayerName(lastPlayer)} status={status} message={connectionError} />
-          {rules.length ? <RuleList rules={rules} /> : null}
-        </Grid.Column>
-        <Grid.Column width={6}>
-          <Grid stackable>
-            <Grid.Column width={8}>
-              {Object.keys(specialHolders).map((key) =>
-                specialHolders[key] ? (
-                  <SpecialCardHolder
-                    playerName={findPlayerName(specialHolders[key].player)}
-                    card={specialHolders[key].card}
-                    key={key}
-                  />
-                ) : null
-              )}
-            </Grid.Column>
-            <Grid.Column width={8}>
-              <Deck cardsRemaining={deck.length} />
-              <PlayerList
-                players={players}
-                nextPlayer={nextPlayer}
-                lastPlayer={lastPlayer}
-                thisPlayerName={findPlayerName(playerId)}
-              />
-              <GameButtons
-                drawButtonDisabled={nextPlayer !== playerId || status !== IN_PROGRESS}
-                restartButtonVisible={status === GAME_ENDED || status === GAME_ENDED_FROM_ERROR}
-                sendDrawCardMessage={sendDrawCardMessage}
-                sendRestartGameMessage={sendRestartGameMessage}
-              />
-              {mates.length ? <MateList mates={mates} players={players} /> : null}
-            </Grid.Column>
-          </Grid>
-        </Grid.Column>
-      </Grid>
+      {mobileWidth ? mobileView : desktopView}
     </Container>
   );
 };
