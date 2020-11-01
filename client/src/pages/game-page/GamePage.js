@@ -134,7 +134,12 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
             </Grid.Column>
             <Grid.Column width={8}>
               <Deck cardsRemaining={deck.length} />
-              <PlayerList players={players} nextUp={nextPlayer} />
+              <PlayerList
+                players={players}
+                nextPlayer={nextPlayer}
+                lastPlayer={lastPlayer}
+                thisPlayerName={findPlayerName(playerId)}
+              />
               <GameButtons
                 drawButtonDisabled={nextPlayer !== playerId || status !== IN_PROGRESS}
                 restartButtonVisible={status === GAME_ENDED || status === GAME_ENDED_FROM_ERROR}
