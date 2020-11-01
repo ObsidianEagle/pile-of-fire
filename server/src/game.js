@@ -99,7 +99,9 @@ export const removePlayer = (gameState, ws, clients) => {
 
   if (ws.id === gameState.nextPlayer) {
     gameState.nextPlayer =
-      gameState.players[(gameState.players.findIndex((player) => player.id === ws.id) + 1) % gameState.players.length];
+      gameState.players[
+        (gameState.players.findIndex((player) => player.id === ws.id) + 1) % gameState.players.length
+      ].id;
   }
 
   const matePairingIndex = gameState.mates.findIndex((pairing) => pairing.includes(ws.id));
