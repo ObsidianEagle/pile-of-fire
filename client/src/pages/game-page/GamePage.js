@@ -28,7 +28,7 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
 
   useEffect(() => {
     window.addEventListener('resize', () => setMobileWidth(window.innerWidth < 600));
-  }, [setMobileWidth])
+  }, [setMobileWidth]);
 
   useEffect(() => {
     ws.onmessage = (e) => {
@@ -156,32 +156,42 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
 
   const mobileView = (
     <>
-      <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} />
+      <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} mobile={true} />
       <StatusMessage playerName={findPlayerName(lastPlayer)} status={status} message={connectionError} />
       {rules.length ? <RuleList rules={rules} /> : null}
-      {Object.keys(specialHolders).map((key) =>
-        specialHolders[key] ? (
-          <SpecialCardHolder
-            playerName={findPlayerName(specialHolders[key].player)}
-            card={specialHolders[key].card}
-            key={key}
-          />
-        ) : null
-      )}
-      <Deck cardsRemaining={deck.length} />
-      <PlayerList
-        players={players}
-        nextPlayer={nextPlayer}
-        lastPlayer={lastPlayer}
-        thisPlayerName={findPlayerName(playerId)}
-      />
-      <GameButtons
-        drawButtonDisabled={nextPlayer !== playerId || status !== IN_PROGRESS}
-        restartButtonVisible={status === GAME_ENDED || status === GAME_ENDED_FROM_ERROR}
-        sendDrawCardMessage={sendDrawCardMessage}
-        sendRestartGameMessage={sendRestartGameMessage}
-      />
+      <Grid columns={Object.keys(specialHolders).filter((key) => specialHolders[key]).length}>
+        {Object.keys(specialHolders).map((key) =>
+          specialHolders[key] ? (
+            <Grid.Column key={key}>
+              <SpecialCardHolder
+                playerName={findPlayerName(specialHolders[key].player)}
+                card={specialHolders[key].card}
+                key={key}
+              />
+            </Grid.Column>
+          ) : null
+        )}
+      </Grid>
       {mates.length ? <MateList mates={mates} players={players} /> : null}
+      <Grid columns={2}>
+        <Grid.Column>
+          <PlayerList
+            players={players}
+            nextPlayer={nextPlayer}
+            lastPlayer={lastPlayer}
+            thisPlayerName={findPlayerName(playerId)}
+          />
+        </Grid.Column>
+        <Grid.Column>
+          <Deck cardsRemaining={deck.length} />
+          <GameButtons
+            drawButtonDisabled={nextPlayer !== playerId || status !== IN_PROGRESS}
+            restartButtonVisible={status === GAME_ENDED || status === GAME_ENDED_FROM_ERROR}
+            sendDrawCardMessage={sendDrawCardMessage}
+            sendRestartGameMessage={sendRestartGameMessage}
+          />
+        </Grid.Column>
+      </Grid>
     </>
   );
 
