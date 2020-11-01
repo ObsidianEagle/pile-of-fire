@@ -116,7 +116,6 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
         <Grid.Column width={10}>
           <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} />
           <StatusMessage playerName={findPlayerName(lastPlayer)} status={status} message={connectionError} />
-          <br />
           {rules.length ? <RuleList rules={rules} /> : null}
         </Grid.Column>
         <Grid.Column width={6}>
