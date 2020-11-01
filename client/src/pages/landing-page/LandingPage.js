@@ -20,8 +20,10 @@ const LandingPage = ({ setPlayerId, setGameState, setWs }) => {
   const [name, setName] = useState('');
   const [host, setHost] = useState(initialHost);
   const [errorMessage, setErrorMessage] = useState('');
+  const [connecting, setConnecting] = useState(false);
 
   const enterGame = (host, name) => {
+    setConnecting(true);
     const ws = new WebSocket(`${PROTOCOL}://${host}`);
     setWs(ws);
 
@@ -42,6 +44,7 @@ const LandingPage = ({ setPlayerId, setGameState, setWs }) => {
           console.log(msg);
           break;
       }
+      setConnecting(false);
     };
 
     ws.onerror = (e) => setErrorMessage(`WebSocket error: ${JSON.stringify(e)}`);
@@ -66,7 +69,7 @@ const LandingPage = ({ setPlayerId, setGameState, setWs }) => {
         className="form-element form-input"
       />
       <Button
-        disabled={!name || !host}
+        disabled={!name || !host || connecting}
         onClick={() => enterGame(host, name)}
         className="form-element enter-game-button"
       >
