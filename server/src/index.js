@@ -1,4 +1,4 @@
-import {} from 'dotenv/config.js';
+import { } from 'dotenv/config.js';
 import fs from 'fs';
 import https from 'https';
 import readline from 'readline';
@@ -13,7 +13,7 @@ import {
   RESTART_GAME,
   SERVER_ERROR
 } from './constants/messages.js';
-import { GAME_ENDED_FROM_ERROR, IN_PROGRESS } from './constants/statuses.js';
+import { IN_PROGRESS } from './constants/statuses.js';
 import {
   addMates,
   changeRules,

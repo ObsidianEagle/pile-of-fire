@@ -136,11 +136,15 @@ export const addMates = (chooserId, chosenId, gameState) => {
   const existingChosenPairing = gameState.mates.find((pairing) => pairing.includes(chosenId));
   if (existingChooserPairing && existingChosenPairing) {
     const newPairing = [...existingChooserPairing, ...existingChosenPairing];
-    const newMates = gameState.mates.filter(
-      (pairing) => pairing !== existingChooserPairing || pairing !== existingChosenPairing
+    gameState.mates.splice(
+      gameState.mates.findIndex((pairing) => pairing === existingChooserPairing),
+      1
     );
-    newMates.push(newPairing);
-    gameState.mates = newMates;
+    gameState.mates.splice(
+      gameState.mates.findIndex((pairing) => pairing === existingChosenPairing),
+      1
+    );
+    gameState.mates.push(newPairing);
     return;
   } else if (existingChooserPairing) {
     existingChooserPairing.push(chosenId);
