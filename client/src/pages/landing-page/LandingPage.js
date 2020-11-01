@@ -43,6 +43,10 @@ const LandingPage = ({ setPlayerId, setGameState, setWs }) => {
           break;
       }
     };
+
+    ws.onerror = (e) => setErrorMessage(`WebSocket error: ${JSON.stringify(e)}`);
+
+    ws.onclose = (e) => setErrorMessage(`Connection closed: code ${e.code}${e.reason ? ` - reason ${e.reason}` : ''}`);
   };
 
   return (
