@@ -1,5 +1,8 @@
-import { PLAYER_CHOICE_REQUEST, PLAYER_INIT_ACK } from './constants/messages.js';
-import { GAME_ENDED, WAITING_FOR_PLAYER, IN_PROGRESS } from './constants/statuses.js';
+import { PLAYER_CHOICE_REQUEST, PLAYER_INIT_ACK, TIMEOUT_WARNING } from './constants/messages.js';
+import { GAME_ENDED, IN_PROGRESS, WAITING_FOR_PLAYER } from './constants/statuses.js';
+
+const TIMEOUT_WARNING_TIME = 120000;
+const TIMEOUT_TIME = 60000;
 
 export const populateDeck = (numberOfDecks) => {
   const suits = ['HEARTS', 'SPADES', 'DIAMONDS', 'CLUBS'];
@@ -19,6 +22,17 @@ export const populateDeck = (numberOfDecks) => {
 
 export const checkGameEnded = (gameState) => {
   if (!gameState.deck.length) gameState.status = GAME_ENDED;
+};
+
+export const broadcastGameState = (gameState, clients) => {
+  checkGameEnded(gameState);
+  const msgObject = {
+    type: GAME_STATE,
+    payload: { gameState }
+  };
+  const msgString = JSON.stringify(msgObject);
+  clients.forEach((client) => client.send(msgString));
+  console.debug('updated game state broadcast to all clients');
 };
 
 export const initialisePlayer = (playerInitRequest, gameState, ws) => {
@@ -48,8 +62,10 @@ export const requestPlayerChoice = (gameState, ws) => {
   console.debug(`client ${ws.id}: player choice request sent`);
 };
 
-export const drawCard = (gameState, ws) => {
+export const drawCard = (gameState, ws, clients) => {
   if (ws.id !== gameState.nextPlayer || !gameState.deck.length) return;
+
+  clearPlayerTimeouts(ws);
 
   const card = gameState.deck.splice(Math.floor(Math.random() * gameState.deck.length), 1)[0];
 
@@ -57,6 +73,7 @@ export const drawCard = (gameState, ws) => {
   gameState.lastPlayer = ws.id;
   gameState.nextPlayer =
     gameState.players[(gameState.players.findIndex((player) => player.id === ws.id) + 1) % gameState.players.length].id;
+  beginTimeoutTimer(clients.find((client) => client.id === gameState.nextPlayer));
 
   switch (card.value) {
     case 'A':
@@ -191,4 +208,26 @@ export const restartGame = (gameState, numberOfDecks) => {
     Q: null,
     5: null
   };
+};
+
+export const sendTimeoutWarning = (ws, gameState, clients) => {
+  const msgObject = {
+    type: TIMEOUT_WARNING,
+    payload: {}
+  };
+  const msgString = JSON.stringify(msgObject);
+  ws.send(msgString);
+  beginTimeoutTimer(ws, gameState, clients);
+  console.debug(`client ${ws.id}: timeout warning issued`);
+};
+
+export const beginTimeoutWarningTimer = (ws) =>
+  (ws.timeoutWarning = setTimeout(() => sendTimeoutWarning(ws), TIMEOUT_WARNING_TIME));
+
+export const beginTimeoutTimer = (ws, gameState, clients) =>
+  (ws.timeout = setTimeout(() => removePlayer(gameState, ws, clients), TIMEOUT_TIME));
+
+export const clearPlayerTimeouts = (ws) => {
+  if (ws.timeout) clearTimeout(ws.timeout);
+  if (ws.timeoutWarning) clearTimeout(ws.timeoutWarning);
 };

@@ -3,11 +3,11 @@ import fs from 'fs';
 import https from 'https';
 import readline from 'readline';
 import WebSocket from 'ws';
-import { broadcastGameState } from './broadcast.js';
 import { EXIT, HELP, REMOVE_PLAYER, RESTART, SET_DECKS, SKIP, UPDATE } from './constants/commands.js';
 import {
   CHANGE_STATUS,
   DRAW_CARD,
+  KEEP_ALIVE,
   PLAYER_CHOICE_RESPONSE,
   PLAYER_INIT,
   RESTART_GAME,
@@ -16,7 +16,10 @@ import {
 import { IN_PROGRESS } from './constants/statuses.js';
 import {
   addMates,
+  beginTimeoutTimer,
+  broadcastGameState,
   changeRules,
+  clearPlayerTimeouts,
   drawCard,
   initialisePlayer,
   populateDeck,
@@ -109,7 +112,7 @@ wss.on('connection', (ws) => {
         console.debug(`client ${ws.id}: game status changed to ${req.payload.status}`);
         broadcastGameState(gameState, clients);
       case DRAW_CARD:
-        drawCard(gameState, ws);
+        drawCard(gameState, ws, clients);
         console.debug(`client ${ws.id}: drew card`);
         broadcastGameState(gameState, clients);
         break;
@@ -117,6 +120,11 @@ wss.on('connection', (ws) => {
         restartGame(gameState, numberOfDecks);
         console.debug(`client ${ws.id}: restarted game`);
         broadcastGameState(gameState, clients);
+        break;
+      case KEEP_ALIVE:
+        clearPlayerTimeouts(ws);
+        console.debug(`client ${ws.id}: timeout timer restarted`);
+        beginTimeoutWarningTimer(ws);
         break;
       case PLAYER_CHOICE_RESPONSE:
         if (gameState.lastPlayer !== ws.id) break;

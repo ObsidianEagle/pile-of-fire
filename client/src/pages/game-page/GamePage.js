@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container, Grid } from 'semantic-ui-react';
+import { Button, Container, Grid, Modal } from 'semantic-ui-react';
 import Deck from '../../components/deck/Deck';
 import GameButtons from '../../components/game-buttons/GameButtons';
 import MateList from '../../components/mate-list/MateList';
@@ -13,9 +13,11 @@ import TurnDisplay from '../../components/turn-display/TurnDisplay';
 import {
   DRAW_CARD,
   GAME_STATE,
+  KEEP_ALIVE,
   PLAYER_CHOICE_REQUEST,
   PLAYER_CHOICE_RESPONSE,
-  RESTART_GAME
+  RESTART_GAME,
+  TIMEOUT_WARNING
 } from '../../constants/messages';
 import { GAME_ENDED, GAME_ENDED_FROM_ERROR, IN_PROGRESS } from '../../constants/statuses';
 import './GamePage.scss';
@@ -23,6 +25,7 @@ import './GamePage.scss';
 const GamePage = ({ playerId, gameState, ws, setGameState }) => {
   const [showMateModal, setShowMateModal] = useState(false);
   const [showRuleModal, setShowRuleModal] = useState(false);
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const [connectionError, setConnectionError] = useState('');
   const [mobileWidth, setMobileWidth] = useState(false);
 
@@ -36,6 +39,9 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
       switch (msg.type) {
         case GAME_STATE:
           setGameState(msg.payload.gameState);
+          break;
+        case TIMEOUT_WARNING:
+          setShowTimeoutModal(true);
           break;
         case PLAYER_CHOICE_REQUEST:
           const { value } = msg.payload.card;
@@ -111,7 +117,27 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
     setShowRuleModal(false);
   };
 
+  const keepAlive = () => {
+    const msgObject = {
+      type: KEEP_ALIVE,
+      payload: {}
+    }
+    const msgString = JSON.stringify(msgObject);
+    ws.send(msgString);
+    setShowTimeoutModal(false);
+  }
+
   const findPlayerName = (id) => players.find((player) => player.id === id)?.name;
+
+  const timeoutModal = (
+    <Modal isOpen={showTimeoutModal}>
+      <Modal.Header>IT'S YOUR TURN</Modal.Header>
+      <Modal.Content>
+        <p>You have 1 minute to confirm</p>
+        <Button onClick={keepAlive}>I'm still here</Button>
+      </Modal.Content>
+    </Modal>
+  );
 
   const desktopView = (
     <Grid stackable>
@@ -199,6 +225,7 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
     <Container className="game-page">
       <MateModal playerId={playerId} players={players} mates={mates} chooseMate={chooseMate} isOpen={showMateModal} />
       <RuleModal rules={rules} chooseRule={chooseRule} isOpen={showRuleModal} />
+      {timeoutModal}
       {mobileWidth ? mobileView : desktopView}
     </Container>
   );
