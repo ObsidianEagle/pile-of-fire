@@ -27,7 +27,7 @@ const LandingPage = ({ setPlayerId, setGameState, setWs }) => {
     const ws = new WebSocket(`${PROTOCOL}://${host}`);
     setWs(ws);
 
-    ws.onopen = () => ws.send(JSON.stringify({ type: PLAYER_INIT, payload: { name: name } }));
+    ws.onopen = () => ws.send(JSON.stringify({ type: PLAYER_INIT, payload: { name: name.trim() } }));
 
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
