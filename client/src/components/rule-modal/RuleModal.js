@@ -18,6 +18,7 @@ const RuleModal = ({ isOpen, chooseRule, rules }) => {
           value={inputRule}
           onChange={(e) => setInputRule(e.target.value)}
           fluid
+          maxLength={140}
         />
         {rules.length ? (
           <>
