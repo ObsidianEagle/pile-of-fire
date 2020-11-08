@@ -146,7 +146,8 @@ export const removePlayer = (gameState, ws, clients) => {
 
   // Unassign any special held cards by leaving player
   Object.keys(gameState.specialHolders).forEach((key) => {
-    if (gameState.specialHolders[key]?.player === ws.id) gameState.specialHolders[key] = null;
+    if (gameState.specialHolders[key] && gameState.specialHolders[key].player === ws.id)
+      gameState.specialHolders[key] = null;
   });
 
   // Remove leaving player from player list
