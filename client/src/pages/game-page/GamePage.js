@@ -153,8 +153,7 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
             <Deck cardsRemaining={deck.length} />
             <PlayerList
               players={players}
-              nextPlayer={nextPlayer}
-              lastPlayer={lastPlayer}
+              nextPlayerName={findPlayerName(nextPlayer)}
               thisPlayerName={findPlayerName(playerId)}
             />
             <GameButtons
@@ -195,8 +194,7 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
         <Grid.Column>
           <PlayerList
             players={players}
-            nextPlayer={nextPlayer}
-            lastPlayer={lastPlayer}
+            nextPlayerName={findPlayerName(nextPlayer)}
             thisPlayerName={findPlayerName(playerId)}
           />
         </Grid.Column>
