@@ -89,14 +89,20 @@ export const drawCard = (gameState, ws) => {
 };
 
 export const removePlayer = (gameState, ws, clients) => {
+  // Remove from client list
   clients.splice(
     clients.findIndex((client) => client.id === ws.id),
     1
   );
 
+  // Return if client was not in player list
   const isPlayer = gameState.players.find((player) => player.id === ws.id);
   if (!isPlayer) return;
 
+  // If waiting for leaving player to take an action, move on
+  if (gameState.status === WAITING_FOR_PLAYER && gameState.lastPlayer === ws.id) gameState.status = IN_PROGRESS;
+
+  // If leaving player is next up, move on to player after
   if (ws.id === gameState.nextPlayer) {
     gameState.nextPlayer =
       gameState.players[
@@ -104,6 +110,7 @@ export const removePlayer = (gameState, ws, clients) => {
       ].id;
   }
 
+  // Remove leaving player from mate pairings
   const matePairingIndex = gameState.mates.findIndex((pairing) => pairing.includes(ws.id));
   if (matePairingIndex >= 0) {
     if (gameState.mates[matePairingIndex].length === 2) {
@@ -116,9 +123,12 @@ export const removePlayer = (gameState, ws, clients) => {
     }
   }
 
+  // Unassign any special held cards by leaving player
   Object.keys(gameState.specialHolders).forEach((key) => {
     if (gameState.specialHolders[key]?.player === ws.id) gameState.specialHolders[key] = null;
   });
+
+  // Remove leaving player from player list
   gameState.players.splice(
     gameState.players.findIndex((player) => player.id === ws.id),
     1
