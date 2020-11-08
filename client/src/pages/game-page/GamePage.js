@@ -67,6 +67,8 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
       setConnectionError('Game connection closed by server');
       setTimeout(window.location.reload.bind(window.location), 5000);
     };
+
+    setInterval()
   }, [setGameState, ws]);
 
   useEffect(() => {
