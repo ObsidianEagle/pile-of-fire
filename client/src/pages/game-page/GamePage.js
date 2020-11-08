@@ -67,8 +67,6 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
       setConnectionError('Game connection closed by server');
       setTimeout(window.location.reload.bind(window.location), 5000);
     };
-
-    setInterval()
   }, [setGameState, ws]);
 
   useEffect(() => {
@@ -123,23 +121,13 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
     const msgObject = {
       type: KEEP_ALIVE,
       payload: {}
-    }
+    };
     const msgString = JSON.stringify(msgObject);
     ws.send(msgString);
     setShowTimeoutModal(false);
-  }
+  };
 
   const findPlayerName = (id) => players.find((player) => player.id === id)?.name;
-
-  const timeoutModal = (
-    <Modal isOpen={showTimeoutModal}>
-      <Modal.Header>IT'S YOUR TURN</Modal.Header>
-      <Modal.Content>
-        <p>You have 1 minute to confirm</p>
-        <Button onClick={keepAlive}>I'm still here</Button>
-      </Modal.Content>
-    </Modal>
-  );
 
   const desktopView = (
     <Grid stackable>
@@ -187,19 +175,21 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
       <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} mobile={true} />
       <StatusMessage playerName={findPlayerName(lastPlayer)} status={status} message={connectionError} />
       {rules.length ? <RuleList rules={rules} /> : null}
-      <Grid columns={Object.keys(specialHolders).filter((key) => specialHolders[key]).length}>
-        {Object.keys(specialHolders).map((key) =>
-          specialHolders[key] ? (
-            <Grid.Column key={key}>
-              <SpecialCardHolder
-                playerName={findPlayerName(specialHolders[key].player)}
-                card={specialHolders[key].card}
-                key={key}
-              />
-            </Grid.Column>
-          ) : null
-        )}
-      </Grid>
+      {Object.keys(specialHolders).filter((key) => specialHolders[key]).length ? (
+        <Grid columns={Object.keys(specialHolders).filter((key) => specialHolders[key]).length}>
+          {Object.keys(specialHolders).map((key) =>
+            specialHolders[key] ? (
+              <Grid.Column key={key}>
+                <SpecialCardHolder
+                  playerName={findPlayerName(specialHolders[key].player)}
+                  card={specialHolders[key].card}
+                  key={key}
+                />
+              </Grid.Column>
+            ) : null
+          )}
+        </Grid>
+      ) : null}
       {mates.length ? <MateList mates={mates} players={players} /> : null}
       <Grid columns={2}>
         <Grid.Column>
@@ -227,7 +217,13 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
     <Container className="game-page">
       <MateModal playerId={playerId} players={players} mates={mates} chooseMate={chooseMate} isOpen={showMateModal} />
       <RuleModal rules={rules} chooseRule={chooseRule} isOpen={showRuleModal} />
-      {timeoutModal}
+      <Modal open={showTimeoutModal}>
+        <Modal.Header>IT'S YOUR TURN</Modal.Header>
+        <Modal.Content>
+          <p>You have 1 minute to confirm</p>
+          <Button onClick={keepAlive}>I'm still here</Button>
+        </Modal.Content>
+      </Modal>
       {mobileWidth ? mobileView : desktopView}
     </Container>
   );

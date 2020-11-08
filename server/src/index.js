@@ -16,7 +16,7 @@ import {
 import { IN_PROGRESS } from './constants/statuses.js';
 import {
   addMates,
-  beginTimeoutTimer,
+  beginTimeoutWarningTimer,
   broadcastGameState,
   changeRules,
   clearPlayerTimeouts,
@@ -124,7 +124,7 @@ wss.on('connection', (ws) => {
       case KEEP_ALIVE:
         clearPlayerTimeouts(ws);
         console.debug(`client ${ws.id}: timeout timer restarted`);
-        beginTimeoutWarningTimer(ws);
+        beginTimeoutWarningTimer(ws, gameState, clients);
         break;
       case PLAYER_CHOICE_RESPONSE:
         if (gameState.lastPlayer !== ws.id) break;

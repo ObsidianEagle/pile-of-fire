@@ -1,4 +1,4 @@
-import { PLAYER_CHOICE_REQUEST, PLAYER_INIT_ACK, TIMEOUT_WARNING } from './constants/messages.js';
+import { GAME_STATE, PLAYER_CHOICE_REQUEST, PLAYER_INIT_ACK, TIMEOUT_WARNING } from './constants/messages.js';
 import { GAME_ENDED, IN_PROGRESS, WAITING_FOR_PLAYER } from './constants/statuses.js';
 
 const TIMEOUT_WARNING_TIME = 120000;
@@ -73,7 +73,11 @@ export const drawCard = (gameState, ws, clients) => {
   gameState.lastPlayer = ws.id;
   gameState.nextPlayer =
     gameState.players[(gameState.players.findIndex((player) => player.id === ws.id) + 1) % gameState.players.length].id;
-  beginTimeoutTimer(clients.find((client) => client.id === gameState.nextPlayer));
+  beginTimeoutWarningTimer(
+    clients.find((client) => client.id === gameState.nextPlayer),
+    gameState,
+    clients
+  );
 
   switch (card.value) {
     case 'A':
@@ -221,11 +225,14 @@ export const sendTimeoutWarning = (ws, gameState, clients) => {
   console.debug(`client ${ws.id}: timeout warning issued`);
 };
 
-export const beginTimeoutWarningTimer = (ws) =>
-  (ws.timeoutWarning = setTimeout(() => sendTimeoutWarning(ws), TIMEOUT_WARNING_TIME));
+export const beginTimeoutWarningTimer = (ws, gameState, clients) =>
+  (ws.timeoutWarning = setTimeout(() => sendTimeoutWarning(ws, gameState, clients), TIMEOUT_WARNING_TIME));
 
 export const beginTimeoutTimer = (ws, gameState, clients) =>
-  (ws.timeout = setTimeout(() => removePlayer(gameState, ws, clients), TIMEOUT_TIME));
+  (ws.timeout = setTimeout(() => {
+    removePlayer(gameState, ws, clients);
+    ws.close();
+  }, TIMEOUT_TIME));
 
 export const clearPlayerTimeouts = (ws) => {
   if (ws.timeout) clearTimeout(ws.timeout);
