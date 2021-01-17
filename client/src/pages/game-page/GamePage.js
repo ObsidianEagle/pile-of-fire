@@ -5,6 +5,7 @@ import GameButtons from '../../components/game-buttons/GameButtons';
 import MateList from '../../components/mate-list/MateList';
 import MateModal from '../../components/mate-modal/MateModal';
 import PlayerList from '../../components/player-list/PlayerList';
+import RoomCodeDisplay from '../../components/room-code-display/RoomCodeDisplay';
 import RuleList from '../../components/rule-list/RuleList';
 import RuleModal from '../../components/rule-modal/RuleModal';
 import SpecialCardHolder from '../../components/special-card-holder/SpecialCardHolder';
@@ -73,17 +74,7 @@ const GamePage = ({ playerId, roomState, ws, setRoomState }) => {
   const {
     code: roomCode,
     host: hostId,
-    gameState: { 
-      nextPlayer,
-      lastPlayer,
-      deck,
-      lastCardDrawn,
-      players,
-      specialHolders,
-      status,
-      rules,
-      mates
-    }
+    gameState: { nextPlayer, lastPlayer, deck, lastCardDrawn, players, specialHolders, status, rules, mates }
   } = roomState;
 
   const sendDrawCardMessage = () => {
@@ -215,11 +206,14 @@ const GamePage = ({ playerId, roomState, ws, setRoomState }) => {
   );
 
   return (
-    <Container className="game-page">
-      <MateModal playerId={playerId} players={players} mates={mates} chooseMate={chooseMate} isOpen={showMateModal} />
-      <RuleModal rules={rules} chooseRule={chooseRule} isOpen={showRuleModal} />
-      {mobileWidth ? mobileView : desktopView}
-    </Container>
+    <div>
+      <RoomCodeDisplay roomCode={roomCode} />
+      <Container className="game-page">
+        <MateModal playerId={playerId} players={players} mates={mates} chooseMate={chooseMate} isOpen={showMateModal} />
+        <RuleModal rules={rules} chooseRule={chooseRule} isOpen={showRuleModal} />
+        {mobileWidth ? mobileView : desktopView}
+      </Container>
+    </div>
   );
 };
 
