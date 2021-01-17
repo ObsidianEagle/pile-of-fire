@@ -58,15 +58,15 @@ wss.on('connection', (ws) => {
       sendServerError('Message did not contain valid room code', [ws]);
       return;
     }
-    const { gameState } = room;
+    const gameState = room ? room.gameState : undefined;
 
     switch (req.type) {
       case ROOM_INIT:
         createRoom(rooms, ws.id, req.payload.numberOfDecks);
         const room = rooms.find((room) => room.host === ws.id);
         console.debug(`client ${ws.id}: room created with code ${room.code}`);
-        initialisePlayer(req.payload, room.gameState, ws);
-        console.debug(`client ${ws.id}: player initialised with name ${ws.name}`);
+        initialisePlayer(req.payload.name, room.code, rooms, ws);
+        console.debug(`client ${ws.id}: player initialised in room ${room.code} with name ${ws.name}`);
         break;
 
       case PLAYER_INIT:
@@ -79,8 +79,8 @@ wss.on('connection', (ws) => {
           );
           break;
         }
-        initialisePlayer(req.payload, gameState, ws);
-        console.debug(`client ${ws.id}: player initialised with name ${ws.name}`);
+        initialisePlayer(req.payload.name, req.payload.room, rooms, ws);
+        console.debug(`client ${ws.id}: player initialised in room ${room.code} with name ${ws.name}`);
         broadcastGameState(gameState, clients);
         break;
 

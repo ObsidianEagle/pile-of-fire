@@ -12,8 +12,17 @@ export const broadcastGameState = (gameState, clients) => {
   console.debug('updated game state broadcast to all clients');
 };
 
-export const initialisePlayer = (playerInitRequest, gameState, ws) => {
-  ws.name = playerInitRequest.name;
+export const initialisePlayer = (name, roomCode, rooms, ws) => {
+  ws.name = name;
+
+  const room = rooms.find(room => room.code === roomCode.toUpperCase());
+  if (!room) {
+    console.debug(`client ${ws.id}: attempted to join invalid room`);
+    sendServerError('Message did not contain valid room code', [ws]);
+    return;
+  }
+  const { gameState } = room;
+
   gameState.players.push({
     name: ws.name,
     id: ws.id
