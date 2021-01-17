@@ -9,7 +9,7 @@ const App = () => {
   const [ws, setWs] = useState(null);
 
   return (
-    <div className="App">
+    <div className="app">
       {playerId >= 0 && roomState ? (
         <GamePage playerId={playerId} roomState={roomState} ws={ws} setRoomState={setRoomState} />
       ) : (

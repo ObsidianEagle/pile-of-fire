@@ -73,7 +73,7 @@ const GamePage = ({ playerId, roomState, ws, setRoomState }) => {
 
   const {
     code: roomCode,
-    host: hostId,
+    //host: hostId,
     gameState: { nextPlayer, lastPlayer, deck, lastCardDrawn, players, specialHolders, status, rules, mates }
   } = roomState;
 

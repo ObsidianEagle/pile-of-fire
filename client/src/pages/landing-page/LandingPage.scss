@@ -1,18 +1,16 @@
-@import '../../styles/global';
-
 .ui.landing-page {
     padding-top: 25vh;
     display: flex;
     flex-direction: column;
     align-items: center;
 
-    @media (max-width: $mobile-max-width) {
+    @media (max-width: var(--mobile-max-width)) {
         padding-top: 40vw;
     }
 
     .main-header {
         font-size: 8em;
-        color: $primary-colour;
+        color: var(--primary-colour);
     }
 
     .form-element {
@@ -25,7 +23,7 @@
 
     .enter-game-button {
         padding: 1em 2em;
-        background-color: $primary-colour;
+        background-color: var(--primary-colour);
         color: white;
         width: fit-content;
     }

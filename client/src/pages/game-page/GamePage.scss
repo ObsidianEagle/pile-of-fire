@@ -1,9 +1,7 @@
-@import '../../styles/global';
-
 .ui.game-page {
   margin-top: 2em;
 
-  @media (max-width: $mobile-max-width) {
+  @media (max-width: --mobile-max-width) {
     margin-top: 2em;
     font-size: 0.8em;
 
@@ -23,7 +21,7 @@
   }
 
   h1 {
-    color: $primary-colour;
+    color: var(--primary-colour);
   }
 
   h4 {
