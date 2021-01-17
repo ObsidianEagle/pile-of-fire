@@ -7,7 +7,7 @@ export const RESTART_GAME = 'RESTART_GAME' // { }
 export const ROOM_INIT = 'ROOM_INIT' // { name, numberOfDecks }
 
 // Server -> Client
-export const PLAYER_INIT_ACK = 'PLAYER_INIT_ACK' // { id, gameState }
-export const GAME_STATE = 'GAME_STATE' // { gameState }
+export const PLAYER_INIT_ACK = 'PLAYER_INIT_ACK' // { id, roomState }
+export const ROOM_STATE = 'ROOM_STATE' // { roomState }
 export const PLAYER_CHOICE_REQUEST = 'PLAYER_CHOICE_REQUEST' // { card }
 export const SERVER_ERROR = 'SERVER_ERROR' // { errorMessage }

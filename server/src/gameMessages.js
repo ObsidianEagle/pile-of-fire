@@ -10,7 +10,7 @@ export const broadcastRoomState = (room, clients) => {
   };
   const msgString = JSON.stringify(msgObject);
   clients
-    .filter((client) => gameState.players.map((player) => player.id).includes(client.id))
+    .filter((client) => room.gameState.players.map((player) => player.id).includes(client.id))
     .forEach((client) => client.send(msgString));
   console.debug('updated game state broadcast to all clients');
 };
@@ -19,11 +19,6 @@ export const initialisePlayer = (name, roomCode, rooms, ws) => {
   ws.name = name;
 
   const room = rooms.find((room) => room.code === roomCode.toUpperCase());
-  if (!room) {
-    console.debug(`client ${ws.id}: attempted to join invalid room`);
-    sendServerError('Message did not contain valid room code', [ws]);
-    return;
-  }
   const { gameState } = room;
 
   gameState.players.push({
@@ -36,6 +31,8 @@ export const initialisePlayer = (name, roomCode, rooms, ws) => {
     payload: { id: ws.id, room }
   };
   ws.send(JSON.stringify(playerInitAck));
+
+  return true;
 };
 
 export const requestPlayerChoice = (gameState, ws) => {

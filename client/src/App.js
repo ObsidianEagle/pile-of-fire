@@ -5,15 +5,15 @@ import LandingPage from './pages/landing-page/LandingPage';
 
 const App = () => {
   const [playerId, setPlayerId] = useState(null);
-  const [gameState, setGameState] = useState(null);
+  const [roomState, setRoomState] = useState(null);
   const [ws, setWs] = useState(null);
 
   return (
     <div className="App">
-      {playerId >= 0 && gameState ? (
-        <GamePage playerId={playerId} gameState={gameState} ws={ws} setGameState={setGameState} />
+      {playerId >= 0 && roomState ? (
+        <GamePage playerId={playerId} roomState={roomState} ws={ws} setRoomState={setRoomState} />
       ) : (
-        <LandingPage setPlayerId={setPlayerId} setGameState={setGameState} setWs={setWs} />
+        <LandingPage setPlayerId={setPlayerId} setRoomState={setRoomState} setWs={setWs} />
       )}
       <div className="main-footer">
         <p>

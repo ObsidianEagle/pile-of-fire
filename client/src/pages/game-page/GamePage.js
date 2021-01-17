@@ -12,15 +12,15 @@ import StatusMessage from '../../components/status-message/StatusMessage';
 import TurnDisplay from '../../components/turn-display/TurnDisplay';
 import {
   DRAW_CARD,
-  GAME_STATE,
+  ROOM_STATE,
   PLAYER_CHOICE_REQUEST,
   PLAYER_CHOICE_RESPONSE,
-  RESTART_GAME,
+  RESTART_GAME
 } from '../../constants/messages';
 import { GAME_ENDED, GAME_ENDED_FROM_ERROR, IN_PROGRESS } from '../../constants/statuses';
 import './GamePage.scss';
 
-const GamePage = ({ playerId, gameState, ws, setGameState }) => {
+const GamePage = ({ playerId, roomState, ws, setRoomState }) => {
   const [showMateModal, setShowMateModal] = useState(false);
   const [showRuleModal, setShowRuleModal] = useState(false);
   const [connectionError, setConnectionError] = useState('');
@@ -34,8 +34,8 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
       switch (msg.type) {
-        case GAME_STATE:
-          setGameState(msg.payload.gameState);
+        case ROOM_STATE:
+          setRoomState(msg.payload.room);
           break;
         case PLAYER_CHOICE_REQUEST:
           const { value } = msg.payload.card;
@@ -61,19 +61,35 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
       setConnectionError('Game connection closed by server');
       setTimeout(window.location.reload.bind(window.location), 5000);
     };
-  }, [setGameState, ws]);
+  }, [setRoomState, ws]);
 
+  /* DEBUG */
   useEffect(() => {
-    console.debug(gameState);
-  }, [gameState]);
+    console.debug(roomState);
+  }, [roomState]);
 
-  if (!gameState) return null;
+  if (!roomState) return null;
 
-  const { nextPlayer, lastPlayer, deck, lastCardDrawn, players, specialHolders, status, rules, mates } = gameState;
+  const {
+    code: roomCode,
+    host: hostId,
+    gameState: { 
+      nextPlayer,
+      lastPlayer,
+      deck,
+      lastCardDrawn,
+      players,
+      specialHolders,
+      status,
+      rules,
+      mates
+    }
+  } = roomState;
 
   const sendDrawCardMessage = () => {
     const msgObject = {
-      type: DRAW_CARD
+      type: DRAW_CARD,
+      room: roomCode
     };
     const msgString = JSON.stringify(msgObject);
     ws.send(msgString);
@@ -81,7 +97,8 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
 
   const sendRestartGameMessage = () => {
     const msgObject = {
-      type: RESTART_GAME
+      type: RESTART_GAME,
+      room: roomCode
     };
     const msgString = JSON.stringify(msgObject);
     ws.send(msgString);
@@ -90,6 +107,7 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
   const chooseMate = (mateId) => {
     const msgObject = {
       type: PLAYER_CHOICE_RESPONSE,
+      room: roomCode,
       payload: {
         mateId
       }
@@ -102,6 +120,7 @@ const GamePage = ({ playerId, gameState, ws, setGameState }) => {
   const chooseRule = (rule) => {
     const msgObject = {
       type: PLAYER_CHOICE_RESPONSE,
+      room: roomCode,
       payload: {
         rule
       }

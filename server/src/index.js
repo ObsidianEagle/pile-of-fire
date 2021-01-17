@@ -13,7 +13,7 @@ import {
 import { IN_PROGRESS } from './constants/statuses.js';
 import { broadcastRoomState, initialisePlayer, sendServerError } from './gameMessages.js';
 import { createRoom } from './gameSetup.js';
-import { addMates, changeRules, drawCard, removePlayer, restartGame, skipTurn } from './gameUpdates.js';
+import { addMates, changeRules, drawCard, removePlayer, restartGame } from './gameUpdates.js';
 
 // SERVER
 let PORT = 8080;
@@ -53,7 +53,7 @@ wss.on('connection', (ws) => {
     /* DEBUG */
     console.log(reqString);
 
-    const room = rooms.find((room) => room.code === req.roomCode);
+    const room = rooms.find((room) => room.code === req.room?.toUpperCase());
     if (req.type !== PLAYER_INIT && req.type !== ROOM_INIT && !room) {
       console.debug(`client ${ws.id}: message did not contain valid room code`);
       sendServerError('Message did not contain valid room code', [ws]);
@@ -62,16 +62,27 @@ wss.on('connection', (ws) => {
     const gameState = room ? room.gameState : undefined;
 
     switch (req.type) {
-      case ROOM_INIT:
+      case ROOM_INIT: {
         createRoom(rooms, ws.id, req.payload.numberOfDecks);
         const room = rooms.find((room) => room.host === ws.id);
         console.debug(`client ${ws.id}: room created with code ${room.code}`);
         initialisePlayer(req.payload.name, room.code, rooms, ws);
         console.debug(`client ${ws.id}: player initialised in room ${room.code} with name ${ws.name}`);
         break;
+      }
 
-      case PLAYER_INIT:
-        const duplicateName = gameState.players.find((player) => player.name === req.payload.name);
+      case PLAYER_INIT: {
+        const room = rooms.find(room => room.code === req.payload.room.toUpperCase());
+        if (!room) {
+          console.debug(`client ${ws.id}: attempted to join invalid room ${req.payload.room}`);
+          sendServerError(
+            `A room with that code does not exist`,
+            [ws]
+          );
+          break;
+        }
+
+        const duplicateName = room.gameState.players.find((player) => player.name === req.payload.name);
         if (duplicateName) {
           console.debug(`client ${ws.id}: attempted to join with duplicate name ${req.payload.name}`);
           sendServerError(
@@ -80,10 +91,12 @@ wss.on('connection', (ws) => {
           );
           break;
         }
-        initialisePlayer(req.payload.name, req.payload.room, rooms, ws);
+        
+        initialisePlayer(req.payload.name, req.payload.room.toUpperCase(), rooms, ws);
         console.debug(`client ${ws.id}: player initialised in room ${room.code} with name ${ws.name}`);
         broadcastRoomState(room, clients);
         break;
+      }
 
       case CHANGE_STATUS:
         gameState.status = req.payload.status;
@@ -92,6 +105,8 @@ wss.on('connection', (ws) => {
         break;
 
       case DRAW_CARD:
+        console.log('req', req);
+        console.log('room', room);
         drawCard(gameState, ws, clients);
         console.debug(`client ${ws.id}: drew card`);
         broadcastRoomState(room, clients);
@@ -121,7 +136,7 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
-    const room = rooms.find((room) => room.gameState.players.includes(ws.id));
+    const room = rooms.find((room) => room.gameState.players.map(player => player.id).includes(ws.id));
     const gameState = room ? room.gameState : undefined;
 
     removePlayer(gameState, ws, clients);
@@ -136,6 +151,9 @@ wss.on('connection', (ws) => {
       );
       console.debug(`no players remaining, room removed`);
     }
+
+    /* DEBUG */
+    console.debug(rooms);
   });
 
   ws.on('error', (err) => {
@@ -152,7 +170,7 @@ console.info(`Server running on port ${PORT}`);
 // Heartbeat to prevent connections from going idle
 setInterval(() => {
   if (clients.length) {
-    rooms.forEach(({ gameState }) => broadcastGameState(gameState, clients));
+    rooms.forEach(room => broadcastRoomState(room, clients));
   }
 }, 20000);
 

@@ -7,7 +7,7 @@ import './LandingPage.scss';
 const PROTOCOL = process.env.REACT_APP_USE_WSS === 'true' ? 'wss' : 'ws';
 const HOST = process.env.REACT_APP_SERVER_ADDRESS;
 
-const LandingPage = ({ setPlayerId, setGameState, setWs }) => {
+const LandingPage = ({ setPlayerId, setRoomState, setWs }) => {
   let initialRoomCode = '';
   if (window.location.search.length) {
     const queryParams = window.location.search
@@ -43,7 +43,7 @@ const LandingPage = ({ setPlayerId, setGameState, setWs }) => {
       const msg = JSON.parse(e.data);
       switch (msg.type) {
         case PLAYER_INIT_ACK:
-          setGameState(msg.payload.gameState);
+          setRoomState(msg.payload.room);
           setPlayerId(msg.payload.id);
           break;
         case SERVER_ERROR:
@@ -57,9 +57,9 @@ const LandingPage = ({ setPlayerId, setGameState, setWs }) => {
       setConnecting(false);
     };
 
-    ws.onerror = (e) => setErrorMessage(`WebSocket error: ${JSON.stringify(e)}`);
+    ws.onerror = (e) => console.error(`WebSocket error: ${JSON.stringify(e)}`);
 
-    ws.onclose = (e) => setErrorMessage(`Connection closed: ${e.code} - ${e.reason}`);
+    ws.onclose = (e) => console.error(`Connection closed: ${e.code} - ${e.reason}`);
   };
 
   const createRoom = (name, numberOfDecks) => {
@@ -85,7 +85,7 @@ const LandingPage = ({ setPlayerId, setGameState, setWs }) => {
       const msg = JSON.parse(e.data);
       switch (msg.type) {
         case PLAYER_INIT_ACK:
-          setGameState(msg.payload.gameState);
+          setRoomState(msg.payload.room);
           setPlayerId(msg.payload.id);
           break;
         case SERVER_ERROR:
