@@ -3,7 +3,7 @@ import fs from 'fs';
 import https from 'https';
 import readline from 'readline';
 import WebSocket from 'ws';
-import { EXIT, HELP, REMOVE_PLAYER, RESTART, SET_DECKS, SKIP, UPDATE } from './constants/commands.js';
+import { EXIT, HELP, REMOVE_PLAYER, RESTART, SKIP, UPDATE } from './constants/commands.js';
 import {
   CHANGE_STATUS,
   DRAW_CARD,
@@ -52,8 +52,11 @@ wss.on('connection', (ws) => {
   ws.on('message', (reqString) => {
     const req = JSON.parse(reqString);
 
+    /* DEBUG */
+    console.log(reqString);
+
     const room = rooms.find((room) => room.code === req.roomCode);
-    if (req.type !== PLAYER_INIT && !room) {
+    if (req.type !== PLAYER_INIT && req.type !== ROOM_INIT && !room) {
       console.debug(`client ${ws.id}: message did not contain valid room code`);
       sendServerError('Message did not contain valid room code', [ws]);
       return;
@@ -121,10 +124,11 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     const room = rooms.find((room) => room.gameState.players.includes(ws.id));
-    const { gameState } = room;
+    const gameState = room ? room.gameState : undefined;
 
     removePlayer(gameState, ws, clients);
     console.debug(`client ${ws.id}: connection closed, removed from game`);
+    if (!gameState) return;
     broadcastGameState(gameState, clients);
 
     if (!gameState.players.length) {
@@ -158,14 +162,12 @@ console.info('Type `help` to see a list of commands.');
 rl.on('line', (input) => {
   const inputSplit = input.split(' ');
   const command = inputSplit[0].toLowerCase();
-  const parameter = input.split.length > 1 ? inputSplit[1] : null;
   switch (command) {
     case HELP:
       console.info('Available commands:');
       console.info("  `skip` - skip the current player's turn.");
       console.info('  `update` - broadcast the current game state to all players.');
       console.info('  `restart` - restart the game.');
-      console.info('  `set-decks <number_of_decks>` - update the number of decks in play.');
       console.info('  `remove-player <player_id>` - remove a player from the game. [TODO - Not Yet Implemented]');
       console.info('  `exit` - close the server.');
       break;
@@ -193,14 +195,6 @@ rl.on('line', (input) => {
       console.info('Game restarted.');
       break;
 
-    case SET_DECKS:
-      if (!parameter || isNaN(parseInt(parameter))) {
-        console.info('No valid selection given.');
-      } else {
-        numberOfDecks = parseInt(parameter);
-      }
-      break;
-
     case REMOVE_PLAYER:
       // TODO
       break;
@@ -216,7 +210,9 @@ rl.on('line', (input) => {
 
 // Heartbeat to prevent connections from going idle
 setInterval(() => {
-  if (clients.length) broadcastGameState(gameState, clients);
+  if (clients.length) {
+    rooms.forEach(({ gameState }) => broadcastGameState(gameState, clients));
+  }
 }, 20000);
 
 if (httpsServer) {

@@ -54,7 +54,7 @@ export const removePlayer = (gameState, ws, clients) => {
   );
 
   // Return if client was not in player list
-  const isPlayer = gameState.players.find((player) => player.id === ws.id);
+  const isPlayer = gameState ? gameState.players.find((player) => player.id === ws.id) : false;
   if (!isPlayer) return;
 
   // If waiting for leaving player to take an action, move on

@@ -1,5 +1,6 @@
-import { GAME_STATE, PLAYER_CHOICE_REQUEST, PLAYER_INIT_ACK } from './constants/messages.js';
+import { GAME_STATE, PLAYER_CHOICE_REQUEST, PLAYER_INIT_ACK, SERVER_ERROR } from './constants/messages.js';
 import { WAITING_FOR_PLAYER } from './constants/statuses.js';
+import { checkGameEnded } from './gameUpdates.js';
 
 export const broadcastGameState = (gameState, clients) => {
   checkGameEnded(gameState);
@@ -8,14 +9,16 @@ export const broadcastGameState = (gameState, clients) => {
     payload: { gameState }
   };
   const msgString = JSON.stringify(msgObject);
-  clients.forEach((client) => client.send(msgString));
+  clients
+    .filter((client) => gameState.players.map((player) => player.id).includes(client.id))
+    .forEach((client) => client.send(msgString));
   console.debug('updated game state broadcast to all clients');
 };
 
 export const initialisePlayer = (name, roomCode, rooms, ws) => {
   ws.name = name;
 
-  const room = rooms.find(room => room.code === roomCode.toUpperCase());
+  const room = rooms.find((room) => room.code === roomCode.toUpperCase());
   if (!room) {
     console.debug(`client ${ws.id}: attempted to join invalid room`);
     sendServerError('Message did not contain valid room code', [ws]);
@@ -58,6 +61,6 @@ export const sendServerError = (errorMessage, clients) => {
   const msgString = JSON.stringify(msgObject);
   clients.forEach((client) => client.send(msgString));
   console.debug(
-    `server error with message ${errorMessage} sent to client(s) ${clients.map((client) => client.id).join()}`
+    `server error with message "${errorMessage}" sent to client(s) ${clients.map((client) => client.id).join()}`
   );
 };

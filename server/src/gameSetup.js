@@ -1,3 +1,5 @@
+import { IN_PROGRESS } from './constants/statuses.js';
+
 export const populateDeck = (numberOfDecks = 1) => {
   const suits = ['HEARTS', 'SPADES', 'DIAMONDS', 'CLUBS'];
   const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
@@ -17,7 +19,7 @@ export const populateDeck = (numberOfDecks = 1) => {
 export const generateRoomCode = (rooms) => {
   while (true) {
     const newCode = Math.random().toString(36).substr(2, 5).toUpperCase();
-    if (!rooms.find(room => room.code === newCode)) return newCode;
+    if (!rooms.find((room) => room.code === newCode)) return newCode;
   }
 };
 
