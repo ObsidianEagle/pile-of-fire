@@ -100,7 +100,10 @@ export const skipTurn = (gameState) => {
 };
 
 export const addMates = (chooserId, chosenId, gameState) => {
-  if (gameState.mates.reduce((acc, val) => acc.concat(val), []).length === gameState.players.length)
+  if (
+    gameState.mates.reduce((acc, cur) => acc + cur.length, 0) >= gameState.players.length - 1 &&
+    gameState.mates.length <= 2
+  )
     gameState.mates = [];
 
   const existingChooserPairing = gameState.mates.find((pairing) => pairing.includes(chooserId));
