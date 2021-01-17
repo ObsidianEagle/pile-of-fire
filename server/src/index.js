@@ -7,7 +7,6 @@ import { EXIT, HELP, REMOVE_PLAYER, RESTART, SET_DECKS, SKIP, UPDATE } from './c
 import {
   CHANGE_STATUS,
   DRAW_CARD,
-  KEEP_ALIVE,
   PLAYER_CHOICE_RESPONSE,
   PLAYER_INIT,
   RESTART_GAME,
@@ -16,10 +15,8 @@ import {
 import { IN_PROGRESS } from './constants/statuses.js';
 import {
   addMates,
-  beginTimeoutWarningTimer,
   broadcastGameState,
   changeRules,
-  clearPlayerTimeouts,
   drawCard,
   initialisePlayer,
   populateDeck,
@@ -120,11 +117,6 @@ wss.on('connection', (ws) => {
         restartGame(gameState, numberOfDecks);
         console.debug(`client ${ws.id}: restarted game`);
         broadcastGameState(gameState, clients);
-        break;
-      case KEEP_ALIVE:
-        clearPlayerTimeouts(ws);
-        console.debug(`client ${ws.id}: timeout timer restarted`);
-        beginTimeoutWarningTimer(ws, gameState, clients);
         break;
       case PLAYER_CHOICE_RESPONSE:
         if (gameState.lastPlayer !== ws.id) break;

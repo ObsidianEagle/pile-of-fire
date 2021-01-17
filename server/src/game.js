@@ -1,8 +1,5 @@
-import { GAME_STATE, PLAYER_CHOICE_REQUEST, PLAYER_INIT_ACK, TIMEOUT_WARNING } from './constants/messages.js';
+import { GAME_STATE, PLAYER_CHOICE_REQUEST, PLAYER_INIT_ACK } from './constants/messages.js';
 import { GAME_ENDED, IN_PROGRESS, WAITING_FOR_PLAYER } from './constants/statuses.js';
-
-const TIMEOUT_WARNING_TIME = 120000;
-const TIMEOUT_TIME = 60000;
 
 export const populateDeck = (numberOfDecks) => {
   const suits = ['HEARTS', 'SPADES', 'DIAMONDS', 'CLUBS'];
@@ -65,19 +62,12 @@ export const requestPlayerChoice = (gameState, ws) => {
 export const drawCard = (gameState, ws, clients) => {
   if (ws.id !== gameState.nextPlayer || !gameState.deck.length) return;
 
-  clearPlayerTimeouts(ws);
-
   const card = gameState.deck.splice(Math.floor(Math.random() * gameState.deck.length), 1)[0];
 
   gameState.lastCardDrawn = card;
   gameState.lastPlayer = ws.id;
   gameState.nextPlayer =
     gameState.players[(gameState.players.findIndex((player) => player.id === ws.id) + 1) % gameState.players.length].id;
-  beginTimeoutWarningTimer(
-    clients.find((client) => client.id === gameState.nextPlayer),
-    gameState,
-    clients
-  );
 
   switch (card.value) {
     case 'A':
@@ -213,29 +203,4 @@ export const restartGame = (gameState, numberOfDecks) => {
     Q: null,
     5: null
   };
-};
-
-export const sendTimeoutWarning = (ws, gameState, clients) => {
-  const msgObject = {
-    type: TIMEOUT_WARNING,
-    payload: {}
-  };
-  const msgString = JSON.stringify(msgObject);
-  ws.send(msgString);
-  beginTimeoutTimer(ws, gameState, clients);
-  console.debug(`client ${ws.id}: timeout warning issued`);
-};
-
-export const beginTimeoutWarningTimer = (ws, gameState, clients) =>
-  (ws.timeoutWarning = setTimeout(() => sendTimeoutWarning(ws, gameState, clients), TIMEOUT_WARNING_TIME));
-
-export const beginTimeoutTimer = (ws, gameState, clients) =>
-  (ws.timeout = setTimeout(() => {
-    removePlayer(gameState, ws, clients);
-    ws.close();
-  }, TIMEOUT_TIME));
-
-export const clearPlayerTimeouts = (ws) => {
-  if (ws.timeout) clearTimeout(ws.timeout);
-  if (ws.timeoutWarning) clearTimeout(ws.timeoutWarning);
 };
