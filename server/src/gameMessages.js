@@ -1,12 +1,12 @@
-import { GAME_STATE, PLAYER_CHOICE_REQUEST, PLAYER_INIT_ACK, SERVER_ERROR } from './constants/messages.js';
+import { ROOM_STATE, PLAYER_CHOICE_REQUEST, PLAYER_INIT_ACK, SERVER_ERROR } from './constants/messages.js';
 import { WAITING_FOR_PLAYER } from './constants/statuses.js';
 import { checkGameEnded } from './gameUpdates.js';
 
-export const broadcastGameState = (gameState, clients) => {
-  checkGameEnded(gameState);
+export const broadcastRoomState = (room, clients) => {
+  checkGameEnded(room.gameState);
   const msgObject = {
-    type: GAME_STATE,
-    payload: { gameState }
+    type: ROOM_STATE,
+    payload: { room }
   };
   const msgString = JSON.stringify(msgObject);
   clients
@@ -33,7 +33,7 @@ export const initialisePlayer = (name, roomCode, rooms, ws) => {
   if (!gameState.nextPlayer) gameState.nextPlayer = ws.id;
   const playerInitAck = {
     type: PLAYER_INIT_ACK,
-    payload: { id: ws.id, gameState }
+    payload: { id: ws.id, room }
   };
   ws.send(JSON.stringify(playerInitAck));
 };

@@ -1,9 +1,7 @@
 import {} from 'dotenv/config.js';
 import fs from 'fs';
 import https from 'https';
-import readline from 'readline';
 import WebSocket from 'ws';
-import { EXIT, HELP, REMOVE_PLAYER, RESTART, SKIP, UPDATE } from './constants/commands.js';
 import {
   CHANGE_STATUS,
   DRAW_CARD,
@@ -13,7 +11,7 @@ import {
   ROOM_INIT
 } from './constants/messages.js';
 import { IN_PROGRESS } from './constants/statuses.js';
-import { broadcastGameState, initialisePlayer, sendServerError } from './gameMessages.js';
+import { broadcastRoomState, initialisePlayer, sendServerError } from './gameMessages.js';
 import { createRoom } from './gameSetup.js';
 import { addMates, changeRules, drawCard, removePlayer, restartGame, skipTurn } from './gameUpdates.js';
 
@@ -84,25 +82,25 @@ wss.on('connection', (ws) => {
         }
         initialisePlayer(req.payload.name, req.payload.room, rooms, ws);
         console.debug(`client ${ws.id}: player initialised in room ${room.code} with name ${ws.name}`);
-        broadcastGameState(gameState, clients);
+        broadcastRoomState(room, clients);
         break;
 
       case CHANGE_STATUS:
         gameState.status = req.payload.status;
         console.debug(`client ${ws.id}: game status changed to ${req.payload.status}`);
-        broadcastGameState(gameState, clients);
+        broadcastRoomState(room, clients);
         break;
 
       case DRAW_CARD:
         drawCard(gameState, ws, clients);
         console.debug(`client ${ws.id}: drew card`);
-        broadcastGameState(gameState, clients);
+        broadcastRoomState(room, clients);
         break;
 
       case RESTART_GAME:
         restartGame(gameState, numberOfDecks);
         console.debug(`client ${ws.id}: restarted game`);
-        broadcastGameState(gameState, clients);
+        broadcastRoomState(room, clients);
         break;
 
       case PLAYER_CHOICE_RESPONSE:
@@ -114,7 +112,7 @@ wss.on('connection', (ws) => {
         }
         gameState.status = IN_PROGRESS;
         console.debug(`client ${ws.id}: player choice received`);
-        broadcastGameState(gameState, clients);
+        broadcastRoomState(room, clients);
         break;
 
       default:
@@ -129,7 +127,7 @@ wss.on('connection', (ws) => {
     removePlayer(gameState, ws, clients);
     console.debug(`client ${ws.id}: connection closed, removed from game`);
     if (!gameState) return;
-    broadcastGameState(gameState, clients);
+    broadcastRoomState(room, clients);
 
     if (!gameState.players.length) {
       rooms.splice(
@@ -149,64 +147,7 @@ wss.on('error', (err) => {
   console.debug(`server encountered an error: ${err.name} - ${err.message}`);
 });
 
-// SERVER CLI
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
 console.info(`Server running on port ${PORT}`);
-console.info('Type `start` to begin the game');
-console.info('Type `help` to see a list of commands.');
-
-rl.on('line', (input) => {
-  const inputSplit = input.split(' ');
-  const command = inputSplit[0].toLowerCase();
-  switch (command) {
-    case HELP:
-      console.info('Available commands:');
-      console.info("  `skip` - skip the current player's turn.");
-      console.info('  `update` - broadcast the current game state to all players.');
-      console.info('  `restart` - restart the game.');
-      console.info('  `remove-player <player_id>` - remove a player from the game. [TODO - Not Yet Implemented]');
-      console.info('  `exit` - close the server.');
-      break;
-
-    case SKIP:
-      console.info(`Skipping the turn of player id ${gameState.nextPlayer}`);
-      skipTurn(gameState);
-      broadcastGameState(gameState, clients);
-      console.info(`It is now the turn of player id ${gameState.nextPlayer}`);
-      break;
-
-    case EXIT:
-      console.info('Closing server.');
-      wss.close();
-      process.exit(0);
-
-    case UPDATE:
-      broadcastGameState(gameState, clients);
-      console.info('Broadcasted game state to all players');
-      break;
-
-    case RESTART:
-      restartGame(gameState, numberOfDecks);
-      broadcastGameState(gameState, clients);
-      console.info('Game restarted.');
-      break;
-
-    case REMOVE_PLAYER:
-      // TODO
-      break;
-
-    case '':
-      break;
-
-    default:
-      console.info('Command not recognised.');
-      break;
-  }
-});
 
 // Heartbeat to prevent connections from going idle
 setInterval(() => {
