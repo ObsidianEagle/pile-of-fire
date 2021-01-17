@@ -1,36 +1,43 @@
-import { useState } from 'react';
-import { Button, Container, Header, Input } from 'semantic-ui-react';
+import { useEffect, useState } from 'react';
+import { Button, Container, Divider, Grid, Header, Input, Segment } from 'semantic-ui-react';
 import StatusMessage from '../../components/status-message/StatusMessage';
-import { PLAYER_INIT, PLAYER_INIT_ACK, SERVER_ERROR } from '../../constants/messages';
+import { PLAYER_INIT, PLAYER_INIT_ACK, ROOM_INIT, SERVER_ERROR } from '../../constants/messages';
 import './LandingPage.scss';
 
 const PROTOCOL = process.env.REACT_APP_USE_WSS === 'true' ? 'wss' : 'ws';
+const HOST = process.env.REACT_APP_SERVER_ADDRESS;
 
 const LandingPage = ({ setPlayerId, setGameState, setWs }) => {
-  let initialHost = '';
+  let initialRoomCode = '';
   if (window.location.search.length) {
     const queryParams = window.location.search
       .substring(1)
       .split('&')
       .map((s) => s.split('='));
-    const hostParam = queryParams.find((pair) => pair[0] === 'host');
-    if (hostParam) initialHost = hostParam[1];
+    const roomCodeParam = queryParams.find((pair) => pair[0] === 'room');
+    if (roomCodeParam) initialRoomCode = roomCodeParam[1];
   }
 
   const [name, setName] = useState('');
-  const [host, setHost] = useState(initialHost);
+  const [roomCode, setRoomCode] = useState(initialRoomCode);
+  const [numberOfDecks, setNumberOfDecks] = useState(1);
   const [errorMessage, setErrorMessage] = useState('');
   const [connecting, setConnecting] = useState(false);
+  const [mobileWidth, setMobileWidth] = useState(false);
 
-  const enterGame = (host, name) => {
+  useEffect(() => {
+    window.addEventListener('resize', () => setMobileWidth(window.innerWidth < 768));
+  }, [setMobileWidth]);
+
+  const joinRoom = (name, roomCode) => {
     setConnecting(true);
-    const ws = new WebSocket(`${PROTOCOL}://${host}`);
+    const ws = new WebSocket(`${PROTOCOL}://${HOST}`);
     setWs(ws);
 
     ws.onopen = () => {
-      ws.send(JSON.stringify({ type: PLAYER_INIT, payload: { name: name.trim() } }));
+      ws.send(JSON.stringify({ type: PLAYER_INIT, payload: { name: name.trim(), room: roomCode } }));
       window.setInterval(() => ws.send(JSON.stringify({ type: 'PING' })), 60000);
-    }
+    };
 
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
@@ -52,32 +59,108 @@ const LandingPage = ({ setPlayerId, setGameState, setWs }) => {
 
     ws.onerror = (e) => setErrorMessage(`WebSocket error: ${JSON.stringify(e)}`);
 
-    ws.onclose = (e) => setErrorMessage(`Connection closed: code ${e.code}${e.reason ? ` - reason ${e.reason}` : ''}`);
+    ws.onclose = (e) => setErrorMessage(`Connection closed: ${e.code} - ${e.reason}`);
+  };
+
+  const createRoom = (name, numberOfDecks) => {
+    setConnecting(true);
+    const ws = new WebSocket(`${PROTOCOL}://${HOST}`);
+    setWs(ws);
+
+    ws.onopen = () => {
+      const decks = parseInt(numberOfDecks);
+      ws.send(
+        JSON.stringify({
+          type: ROOM_INIT,
+          payload: {
+            name: name.trim(),
+            numberOfDecks: isNaN(decks) || decks < 1 ? 1 : decks
+          }
+        })
+      );
+      window.setInterval(() => ws.send(JSON.stringify({ type: 'PING' })), 60000);
+    };
+
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      switch (msg.type) {
+        case PLAYER_INIT_ACK:
+          setGameState(msg.payload.gameState);
+          setPlayerId(msg.payload.id);
+          break;
+        case SERVER_ERROR:
+          setErrorMessage(msg.payload.errorMessage);
+          console.error(msg.payload.errorMessage);
+          ws.close();
+          break;
+        default:
+          console.log(msg);
+          break;
+      }
+      setConnecting(false);
+    };
+
+    ws.onerror = (e) => setErrorMessage(`WebSocket error: ${JSON.stringify(e)}`);
+
+    ws.onclose = (e) => setErrorMessage(`Connection closed: ${e.code} - ${e.reason}`);
   };
 
   return (
     <Container textAlign="center" className="landing-page">
       <Header className="main-header">Pile of Fire</Header>
-      <Input
-        label="Your Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="form-element form-input"
-        maxLength={12}
-      />
-      <Input
-        label="Host Address"
-        value={host}
-        onChange={(e) => setHost(e.target.value)}
-        className="form-element form-input"
-      />
-      <Button
-        disabled={!name || !host || connecting}
-        onClick={() => enterGame(host, name)}
-        className="form-element enter-game-button"
-      >
-        Enter Game
-      </Button>
+      <Segment>
+        <Grid stackable relaxed="very" columns={2} divided={mobileWidth}>
+          <Grid.Column>
+            <Input
+              label="Your Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="form-element form-input"
+              maxLength={12}
+            />
+            <Input
+              label="Number of Decks"
+              value={numberOfDecks}
+              onChange={(e) => setNumberOfDecks(e.target.value)}
+              className="form-element form-input"
+              maxLength={2}
+            />
+            <br />
+            <Button
+              disabled={!name || connecting}
+              onClick={() => createRoom(name, numberOfDecks)}
+              className="form-element enter-game-button"
+            >
+              Create Room
+            </Button>
+          </Grid.Column>
+          <Grid.Column>
+            <Input
+              label="Your Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="form-element form-input"
+              maxLength={12}
+            />
+            <Input
+              label="Room Code"
+              value={roomCode}
+              onChange={(e) => setRoomCode(e.target.value)}
+              className="form-element form-input"
+              maxLength={5}
+            />
+            <br />
+            <Button
+              disabled={!name || !roomCode || connecting}
+              onClick={() => joinRoom(name, roomCode)}
+              className="form-element enter-game-button"
+            >
+              Join Room
+            </Button>
+          </Grid.Column>
+        </Grid>
+        {!mobileWidth && <Divider vertical>OR</Divider>}
+      </Segment>
       {errorMessage.length > 0 && <StatusMessage message={errorMessage} />}
     </Container>
   );
