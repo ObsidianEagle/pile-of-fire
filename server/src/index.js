@@ -1,4 +1,4 @@
-import { } from 'dotenv/config.js';
+import {} from 'dotenv/config.js';
 import fs from 'fs';
 import https from 'https';
 import readline from 'readline';
@@ -10,20 +10,12 @@ import {
   PLAYER_CHOICE_RESPONSE,
   PLAYER_INIT,
   RESTART_GAME,
-  SERVER_ERROR
+  ROOM_INIT
 } from './constants/messages.js';
 import { IN_PROGRESS } from './constants/statuses.js';
-import {
-  addMates,
-  broadcastGameState,
-  changeRules,
-  drawCard,
-  initialisePlayer,
-  populateDeck,
-  removePlayer,
-  restartGame,
-  skipTurn
-} from './game.js';
+import { broadcastGameState, initialisePlayer, sendServerError } from './gameMessages.js';
+import { createRoom } from './gameSetup.js';
+import { addMates, changeRules, drawCard, removePlayer, restartGame, skipTurn } from './gameUpdates.js';
 
 // SERVER
 let PORT = 8080;
@@ -43,39 +35,10 @@ if (process.env.USE_HTTPS_SERVER === 'true') {
 }
 const wss = new WebSocket.Server(wssConfig);
 
-const sendServerError = (errorMessage, clients) => {
-  const msgObject = {
-    type: SERVER_ERROR,
-    payload: {
-      errorMessage
-    }
-  };
-  const msgString = JSON.stringify(msgObject);
-  clients.forEach((client) => client.send(msgString));
-  console.debug(
-    `server error with message ${errorMessage} sent to client(s) ${clients.map((client) => client.id).join()}`
-  );
-};
-
 // GLOBALS
 const clients = [];
-let numberOfDecks = 1;
 let idCounter = 1;
-const gameState = {
-  deck: populateDeck(numberOfDecks),
-  status: IN_PROGRESS,
-  lastCardDrawn: null,
-  lastPlayer: null,
-  nextPlayer: null,
-  players: [],
-  mates: [],
-  rules: [],
-  specialHolders: {
-    A: null,
-    Q: null,
-    5: null
-  }
-};
+const rooms = [];
 
 // WEBSOCKET LISTENERS
 wss.on('connection', (ws) => {
@@ -88,36 +51,57 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (reqString) => {
     const req = JSON.parse(reqString);
-    console.log(req);
+
+    const room = rooms.find((room) => room.code === req.roomCode);
+    if (req.type !== PLAYER_INIT && !room) {
+      console.debug(`client ${ws.id}: message did not contain valid room code`);
+      sendServerError('Message did not contain valid room code', [ws]);
+      return;
+    }
+    const { gameState } = room;
+
     switch (req.type) {
+      case ROOM_INIT:
+        createRoom(rooms, ws.id, req.payload.numberOfDecks);
+        const room = rooms.find((room) => room.host === ws.id);
+        console.debug(`client ${ws.id}: room created with code ${room.code}`);
+        initialisePlayer(req.payload, room.gameState, ws);
+        console.debug(`client ${ws.id}: player initialised with name ${ws.name}`);
+        break;
+
       case PLAYER_INIT:
         const duplicateName = gameState.players.find((player) => player.name === req.payload.name);
         if (duplicateName) {
+          console.debug(`client ${ws.id}: attempted to join with duplicate name ${req.payload.name}`);
           sendServerError(
             `Player with name "${req.payload.name}" has already joined - please choose a different name`,
             [ws]
           );
           break;
         }
-
         initialisePlayer(req.payload, gameState, ws);
         console.debug(`client ${ws.id}: player initialised with name ${ws.name}`);
         broadcastGameState(gameState, clients);
         break;
+
       case CHANGE_STATUS:
         gameState.status = req.payload.status;
         console.debug(`client ${ws.id}: game status changed to ${req.payload.status}`);
         broadcastGameState(gameState, clients);
+        break;
+
       case DRAW_CARD:
         drawCard(gameState, ws, clients);
         console.debug(`client ${ws.id}: drew card`);
         broadcastGameState(gameState, clients);
         break;
+
       case RESTART_GAME:
         restartGame(gameState, numberOfDecks);
         console.debug(`client ${ws.id}: restarted game`);
         broadcastGameState(gameState, clients);
         break;
+
       case PLAYER_CHOICE_RESPONSE:
         if (gameState.lastPlayer !== ws.id) break;
         if (req.payload.mateId && gameState.lastCardDrawn.value === '8') {
@@ -129,22 +113,27 @@ wss.on('connection', (ws) => {
         console.debug(`client ${ws.id}: player choice received`);
         broadcastGameState(gameState, clients);
         break;
+
       default:
         break;
     }
   });
 
   ws.on('close', () => {
+    const room = rooms.find((room) => room.gameState.players.includes(ws.id));
+    const { gameState } = room;
+
     removePlayer(gameState, ws, clients);
     console.debug(`client ${ws.id}: connection closed, removed from game`);
+    broadcastGameState(gameState, clients);
 
     if (!gameState.players.length) {
-      restartGame(gameState, numberOfDecks);
-      idCounter = 1;
-      console.debug(`no players remaining, game state reset`);
+      rooms.splice(
+        rooms.findIndex((i) => i === room),
+        1
+      );
+      console.debug(`no players remaining, room removed`);
     }
-
-    broadcastGameState(gameState, clients);
   });
 
   ws.on('error', (err) => {
@@ -180,25 +169,30 @@ rl.on('line', (input) => {
       console.info('  `remove-player <player_id>` - remove a player from the game. [TODO - Not Yet Implemented]');
       console.info('  `exit` - close the server.');
       break;
+
     case SKIP:
       console.info(`Skipping the turn of player id ${gameState.nextPlayer}`);
       skipTurn(gameState);
       broadcastGameState(gameState, clients);
       console.info(`It is now the turn of player id ${gameState.nextPlayer}`);
       break;
+
     case EXIT:
       console.info('Closing server.');
       wss.close();
       process.exit(0);
+
     case UPDATE:
       broadcastGameState(gameState, clients);
       console.info('Broadcasted game state to all players');
       break;
+
     case RESTART:
       restartGame(gameState, numberOfDecks);
       broadcastGameState(gameState, clients);
       console.info('Game restarted.');
       break;
+
     case SET_DECKS:
       if (!parameter || isNaN(parseInt(parameter))) {
         console.info('No valid selection given.');
@@ -206,10 +200,14 @@ rl.on('line', (input) => {
         numberOfDecks = parseInt(parameter);
       }
       break;
+
     case REMOVE_PLAYER:
+      // TODO
       break;
+
     case '':
       break;
+
     default:
       console.info('Command not recognised.');
       break;

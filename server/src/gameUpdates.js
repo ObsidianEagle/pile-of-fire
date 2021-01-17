@@ -1,65 +1,12 @@
-import { GAME_STATE, PLAYER_CHOICE_REQUEST, PLAYER_INIT_ACK } from './constants/messages.js';
 import { GAME_ENDED, IN_PROGRESS, WAITING_FOR_PLAYER } from './constants/statuses.js';
-
-export const populateDeck = (numberOfDecks) => {
-  const suits = ['HEARTS', 'SPADES', 'DIAMONDS', 'CLUBS'];
-  const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-
-  const deck = [];
-  for (let i = 0; i < numberOfDecks; i++) {
-    suits.forEach((suit) => {
-      values.forEach((value) => {
-        deck.push({ suit, value });
-      });
-    });
-  }
-
-  return deck;
-};
+import { requestPlayerChoice } from './gameMessages.js';
+import { populateDeck } from './gameSetup.js';
 
 export const checkGameEnded = (gameState) => {
   if (!gameState.deck.length) gameState.status = GAME_ENDED;
 };
 
-export const broadcastGameState = (gameState, clients) => {
-  checkGameEnded(gameState);
-  const msgObject = {
-    type: GAME_STATE,
-    payload: { gameState }
-  };
-  const msgString = JSON.stringify(msgObject);
-  clients.forEach((client) => client.send(msgString));
-  console.debug('updated game state broadcast to all clients');
-};
-
-export const initialisePlayer = (playerInitRequest, gameState, ws) => {
-  ws.name = playerInitRequest.name;
-  gameState.players.push({
-    name: ws.name,
-    id: ws.id
-  });
-  if (!gameState.nextPlayer) gameState.nextPlayer = ws.id;
-  const playerInitAck = {
-    type: PLAYER_INIT_ACK,
-    payload: { id: ws.id, gameState }
-  };
-  ws.send(JSON.stringify(playerInitAck));
-};
-
-export const requestPlayerChoice = (gameState, ws) => {
-  gameState.status = WAITING_FOR_PLAYER;
-  const msgObject = {
-    type: PLAYER_CHOICE_REQUEST,
-    payload: {
-      card: gameState.lastCardDrawn
-    }
-  };
-  const msgString = JSON.stringify(msgObject);
-  ws.send(msgString);
-  console.debug(`client ${ws.id}: player choice request sent`);
-};
-
-export const drawCard = (gameState, ws, clients) => {
+export const drawCard = (gameState, ws) => {
   if (ws.id !== gameState.nextPlayer || !gameState.deck.length) return;
 
   const card = gameState.deck.splice(Math.floor(Math.random() * gameState.deck.length), 1)[0];
