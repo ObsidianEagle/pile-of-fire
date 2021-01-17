@@ -105,8 +105,6 @@ wss.on('connection', (ws) => {
         break;
 
       case DRAW_CARD:
-        console.log('req', req);
-        console.log('room', room);
         drawCard(gameState, ws, clients);
         console.debug(`client ${ws.id}: drew card`);
         broadcastRoomState(room, clients);
