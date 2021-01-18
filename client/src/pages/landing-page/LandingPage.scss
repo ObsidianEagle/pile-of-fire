@@ -12,6 +12,14 @@
         }
     }
 
+    .ui.segment {
+        background-color: var(--bg-colour);
+    }
+
+    .ui.divider {
+        color: var(--text-colour);
+    }
+
     .dark-mode-toggle-container {
         margin: 1em 0 0 1em;
     }
@@ -22,6 +30,22 @@
 
     .form-input {
         width: 24em;
+
+        & > input {
+            background-color: var(--bg-colour-2);
+            color: var(--text-colour);
+            border: none;
+
+            &:focus {
+                background-color: var(--bg-colour-2);
+                color: var(--text-colour);
+            }
+        }
+
+        & > .label {
+            background-color: var(--bg-colour-3);
+            color: var(--text-colour);
+        }
     }
 
     .enter-game-button {
