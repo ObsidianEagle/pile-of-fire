@@ -6,7 +6,7 @@ const AdminCommands = ({ skipTurn }) => (
       <h4>Admin</h4>
     </Card.Header>
     <Card.Content textAlign="center">
-      <Button onClick={skipTurn} />
+      <Button onClick={skipTurn}>Skip Current Turn</Button>
     </Card.Content>
   </Card>
 );

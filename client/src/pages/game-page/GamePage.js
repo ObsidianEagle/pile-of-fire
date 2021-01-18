@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Container, Grid } from 'semantic-ui-react';
+import AdminCommands from '../../components/admin-commands/AdminCommands';
 import DarkModeToggle from '../../components/dark-mode-toggle/DarkModeToggle';
 import Deck from '../../components/deck/Deck';
 import GameButtons from '../../components/game-buttons/GameButtons';
@@ -17,7 +18,8 @@ import {
   ROOM_STATE,
   PLAYER_CHOICE_REQUEST,
   PLAYER_CHOICE_RESPONSE,
-  RESTART_GAME
+  RESTART_GAME,
+  SKIP_TURN
 } from '../../constants/messages';
 import { GAME_ENDED, GAME_ENDED_FROM_ERROR, IN_PROGRESS } from '../../constants/statuses';
 import './GamePage.scss';
@@ -74,7 +76,7 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
 
   const {
     code: roomCode,
-    //host: hostId,
+    host: hostId,
     gameState: { nextPlayer, lastPlayer, deck, lastCardDrawn, players, specialHolders, status, rules, mates }
   } = roomState;
 
@@ -122,6 +124,15 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
     setShowRuleModal(false);
   };
 
+  const skipTurn = () => {
+    const msgObject = {
+      type: SKIP_TURN,
+      room: roomCode
+    };
+    const msgString = JSON.stringify(msgObject);
+    ws.send(msgString);
+  };
+
   const findPlayerName = (id) => players.find((player) => player.id === id)?.name;
 
   const desktopView = (
@@ -151,13 +162,14 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
               nextPlayerName={findPlayerName(nextPlayer)}
               thisPlayerName={findPlayerName(playerId)}
             />
+            {mates.length ? <MateList mates={mates} players={players} /> : null}
             <GameButtons
               drawButtonDisabled={nextPlayer !== playerId || status !== IN_PROGRESS}
               restartButtonVisible={status === GAME_ENDED || status === GAME_ENDED_FROM_ERROR}
               sendDrawCardMessage={sendDrawCardMessage}
               sendRestartGameMessage={sendRestartGameMessage}
             />
-            {mates.length ? <MateList mates={mates} players={players} /> : null}
+            {hostId === playerId ? <AdminCommands skipTurn={skipTurn} /> : null}
           </Grid.Column>
         </Grid>
       </Grid.Column>
