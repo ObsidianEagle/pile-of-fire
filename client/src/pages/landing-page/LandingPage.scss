@@ -1,3 +1,5 @@
+@import '../../styles/global';
+
 .landing-page {
     display: flex;
     flex-direction: column;
@@ -7,8 +9,9 @@
         font-size: 8em;
         color: var(--primary-colour);
 
-        @media (max-width: var(--mobile-max-width)) {
+        @media (max-width: $mobile-max-width) {
             margin-top: 5vh;
+            font-size: 6em;
         }
     }
 

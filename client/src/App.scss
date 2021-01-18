@@ -1,10 +1,9 @@
+@import './styles/global';
+
 .app {
   min-height: 100%;
   background-color: var(--bg-colour);
   color: var(--text-colour);
-
-  // breakpoints
-  --mobile-max-width: 768px;
 
   // colours
   --bg-colour: #f5f5f5;
@@ -31,7 +30,7 @@
   color: --secondary-colour;
   text-align: center;
 
-  @media (max-width: --mobile-max-width) {
+  @media (max-width: $mobile-max-width) {
     position: static;
   }
 
