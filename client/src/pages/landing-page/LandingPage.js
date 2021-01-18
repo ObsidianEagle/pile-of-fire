@@ -30,7 +30,8 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
     window.addEventListener('resize', () => setMobileWidth(window.innerWidth < 768));
   }, [setMobileWidth]);
 
-  const joinRoom = (name, roomCode) => {
+  const joinRoom = (event, name, roomCode) => {
+    event.preventDefault();
     setConnecting(true);
     const ws = new WebSocket(`${PROTOCOL}://${HOST}`);
     setWs(ws);
@@ -63,7 +64,8 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
     ws.onclose = (e) => console.error(`Connection closed: ${e.code} - ${e.reason}`);
   };
 
-  const createRoom = (name, numberOfDecks) => {
+  const createRoom = (event, name, numberOfDecks) => {
+    event.preventDefault();
     setConnecting(true);
     const ws = new WebSocket(`${PROTOCOL}://${HOST}`);
     setWs(ws);
@@ -134,7 +136,7 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
                 <br />
                 <Button
                   disabled={!name || connecting}
-                  onClick={() => createRoom(name, numberOfDecks)}
+                  onClick={(e) => createRoom(e, name, numberOfDecks)}
                   className="form-element enter-game-button"
                   type="submit"
                 >
@@ -161,7 +163,7 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
                 <br />
                 <Button
                   disabled={!name || !roomCode || connecting}
-                  onClick={() => joinRoom(name, roomCode)}
+                  onClick={(e) => joinRoom(e, name, roomCode)}
                   className="form-element enter-game-button"
                   type="submit"
                 >
