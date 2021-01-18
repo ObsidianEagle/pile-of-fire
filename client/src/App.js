@@ -6,14 +6,28 @@ import LandingPage from './pages/landing-page/LandingPage';
 const App = () => {
   const [playerId, setPlayerId] = useState(null);
   const [roomState, setRoomState] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
   const [ws, setWs] = useState(null);
 
   return (
-    <div className="app">
+    <div className={`app${darkMode ? ' dark' : ''}`}>
       {playerId >= 0 && roomState ? (
-        <GamePage playerId={playerId} roomState={roomState} ws={ws} setRoomState={setRoomState} />
+        <GamePage
+          playerId={playerId}
+          roomState={roomState}
+          ws={ws}
+          setRoomState={setRoomState}
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+        />
       ) : (
-        <LandingPage setPlayerId={setPlayerId} setRoomState={setRoomState} setWs={setWs} />
+        <LandingPage
+          setPlayerId={setPlayerId}
+          setRoomState={setRoomState}
+          setWs={setWs}
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+        />
       )}
       <div className="main-footer">
         <p>

@@ -1,13 +1,20 @@
 .app {
   height: 100%;
+  background-color: var(--bg-colour);
+  color: var(--text-colour);
+
+  // breakpoints
+  --mobile-max-width: 768px;
 
   // colours
   --bg-colour: #FCFCFC;
   --primary-colour: #7234EE;
   --secondary-colour: #A0A0A0;
+  --text-colour: #000000;
 
-  // breakpoints
-  --mobile-max-width: 768px;
+  &.dark {
+    --primary-colour: red;
+  }
 }
 
 .main-footer {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, Container, Divider, Grid, Header, Input, Segment } from 'semantic-ui-react';
+import DarkModeToggle from '../../components/dark-mode-toggle/DarkModeToggle';
 import StatusMessage from '../../components/status-message/StatusMessage';
 import { PLAYER_INIT, PLAYER_INIT_ACK, ROOM_INIT, SERVER_ERROR } from '../../constants/messages';
 import './LandingPage.scss';
@@ -7,7 +8,7 @@ import './LandingPage.scss';
 const PROTOCOL = process.env.REACT_APP_USE_WSS === 'true' ? 'wss' : 'ws';
 const HOST = process.env.REACT_APP_SERVER_ADDRESS;
 
-const LandingPage = ({ setPlayerId, setRoomState, setWs }) => {
+const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, setDarkMode }) => {
   let initialRoomCode = '';
   if (window.location.search.length) {
     const queryParams = window.location.search
@@ -106,63 +107,68 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs }) => {
   };
 
   return (
-    <Container textAlign="center" className="landing-page">
-      <Header className="main-header">Pile of Fire</Header>
-      <Segment>
-        <Grid stackable relaxed="very" columns={2} divided={mobileWidth}>
-          <Grid.Column>
-            <Input
-              label="Your Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="form-element form-input"
-              maxLength={12}
-            />
-            <Input
-              label="Number of Decks"
-              value={numberOfDecks}
-              onChange={(e) => setNumberOfDecks(e.target.value)}
-              className="form-element form-input"
-              maxLength={2}
-            />
-            <br />
-            <Button
-              disabled={!name || connecting}
-              onClick={() => createRoom(name, numberOfDecks)}
-              className="form-element enter-game-button"
-            >
-              Create Room
-            </Button>
-          </Grid.Column>
-          <Grid.Column>
-            <Input
-              label="Your Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="form-element form-input"
-              maxLength={12}
-            />
-            <Input
-              label="Room Code"
-              value={roomCode}
-              onChange={(e) => setRoomCode(e.target.value)}
-              className="form-element form-input"
-              maxLength={5}
-            />
-            <br />
-            <Button
-              disabled={!name || !roomCode || connecting}
-              onClick={() => joinRoom(name, roomCode)}
-              className="form-element enter-game-button"
-            >
-              Join Room
-            </Button>
-          </Grid.Column>
-        </Grid>
-        {!mobileWidth && <Divider vertical>OR</Divider>}
-      </Segment>
-      {errorMessage.length > 0 && <StatusMessage message={errorMessage} />}
-    </Container>
+    <div className="landing-page">
+      <div className="dark-mode-toggle-container">
+        <DarkModeToggle isDark={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />
+      </div>
+      <Container textAlign="center">
+        <Header className="main-header">Pile of Fire</Header>
+        <Segment>
+          <Grid stackable relaxed="very" columns={2} divided={mobileWidth}>
+            <Grid.Column>
+              <Input
+                label="Your Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="form-element form-input"
+                maxLength={12}
+              />
+              <Input
+                label="Number of Decks"
+                value={numberOfDecks}
+                onChange={(e) => setNumberOfDecks(e.target.value)}
+                className="form-element form-input"
+                maxLength={2}
+              />
+              <br />
+              <Button
+                disabled={!name || connecting}
+                onClick={() => createRoom(name, numberOfDecks)}
+                className="form-element enter-game-button"
+              >
+                Create Room
+              </Button>
+            </Grid.Column>
+            <Grid.Column>
+              <Input
+                label="Your Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="form-element form-input"
+                maxLength={12}
+              />
+              <Input
+                label="Room Code"
+                value={roomCode}
+                onChange={(e) => setRoomCode(e.target.value)}
+                className="form-element form-input"
+                maxLength={5}
+              />
+              <br />
+              <Button
+                disabled={!name || !roomCode || connecting}
+                onClick={() => joinRoom(name, roomCode)}
+                className="form-element enter-game-button"
+              >
+                Join Room
+              </Button>
+            </Grid.Column>
+          </Grid>
+          {!mobileWidth && <Divider vertical>OR</Divider>}
+        </Segment>
+        {errorMessage.length > 0 && <StatusMessage message={errorMessage} />}
+      </Container>
+    </div>
   );
 };
 

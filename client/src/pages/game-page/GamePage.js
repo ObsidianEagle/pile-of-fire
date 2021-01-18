@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Container, Grid } from 'semantic-ui-react';
+import DarkModeToggle from '../../components/dark-mode-toggle/DarkModeToggle';
 import Deck from '../../components/deck/Deck';
 import GameButtons from '../../components/game-buttons/GameButtons';
 import MateList from '../../components/mate-list/MateList';
@@ -21,7 +22,7 @@ import {
 import { GAME_ENDED, GAME_ENDED_FROM_ERROR, IN_PROGRESS } from '../../constants/statuses';
 import './GamePage.scss';
 
-const GamePage = ({ playerId, roomState, ws, setRoomState }) => {
+const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, setDarkMode }) => {
   const [showMateModal, setShowMateModal] = useState(false);
   const [showRuleModal, setShowRuleModal] = useState(false);
   const [connectionError, setConnectionError] = useState('');
@@ -207,7 +208,10 @@ const GamePage = ({ playerId, roomState, ws, setRoomState }) => {
 
   return (
     <div>
-      <RoomCodeDisplay roomCode={roomCode} />
+      <div className="dark-mode-toggle-container">
+        <DarkModeToggle isDark={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />
+        <RoomCodeDisplay roomCode={roomCode} />
+      </div>
       <Container className="game-page">
         <MateModal playerId={playerId} players={players} mates={mates} chooseMate={chooseMate} isOpen={showMateModal} />
         <RuleModal rules={rules} chooseRule={chooseRule} isOpen={showRuleModal} />
