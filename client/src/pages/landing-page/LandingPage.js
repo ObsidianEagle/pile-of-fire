@@ -116,52 +116,58 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
         <Segment>
           <Grid stackable relaxed="very" columns={2} divided={mobileWidth}>
             <Grid.Column>
-              <Input
-                label="Your Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="form-element form-input"
-                maxLength={12}
-              />
-              <Input
-                label="Number of Decks"
-                value={numberOfDecks}
-                onChange={(e) => setNumberOfDecks(e.target.value)}
-                className="form-element form-input"
-                maxLength={2}
-              />
-              <br />
-              <Button
-                disabled={!name || connecting}
-                onClick={() => createRoom(name, numberOfDecks)}
-                className="form-element enter-game-button"
-              >
-                Create Room
-              </Button>
+              <form>
+                <Input
+                  label="Your Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="form-element form-input"
+                  maxLength={12}
+                />
+                <Input
+                  label="Number of Decks"
+                  value={numberOfDecks}
+                  onChange={(e) => setNumberOfDecks(e.target.value)}
+                  className="form-element form-input"
+                  maxLength={2}
+                />
+                <br />
+                <Button
+                  disabled={!name || connecting}
+                  onClick={() => createRoom(name, numberOfDecks)}
+                  className="form-element enter-game-button"
+                  type="submit"
+                >
+                  Create Room
+                </Button>
+              </form>
             </Grid.Column>
             <Grid.Column>
-              <Input
-                label="Your Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="form-element form-input"
-                maxLength={12}
-              />
-              <Input
-                label="Room Code"
-                value={roomCode}
-                onChange={(e) => setRoomCode(e.target.value)}
-                className="form-element form-input"
-                maxLength={5}
-              />
-              <br />
-              <Button
-                disabled={!name || !roomCode || connecting}
-                onClick={() => joinRoom(name, roomCode)}
-                className="form-element enter-game-button"
-              >
-                Join Room
-              </Button>
+              <form>
+                <Input
+                  label="Your Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="form-element form-input"
+                  maxLength={12}
+                />
+                <Input
+                  label="Room Code"
+                  value={roomCode}
+                  onChange={(e) => setRoomCode(e.target.value)}
+                  className="form-element form-input"
+                  maxLength={5}
+                />
+                <br />
+                <Button
+                  disabled={!name || !roomCode || connecting}
+                  onClick={() => joinRoom(name, roomCode)}
+                  className="form-element enter-game-button"
+                  type="submit"
+                >
+                  Join Room
+                </Button>
+              </form>
             </Grid.Column>
           </Grid>
           {!mobileWidth && <Divider vertical>OR</Divider>}
