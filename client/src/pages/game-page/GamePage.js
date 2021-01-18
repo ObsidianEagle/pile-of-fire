@@ -22,7 +22,7 @@ import {
 import { GAME_ENDED, GAME_ENDED_FROM_ERROR, IN_PROGRESS } from '../../constants/statuses';
 import './GamePage.scss';
 
-const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, setDarkMode }) => {
+const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkMode }) => {
   const [showMateModal, setShowMateModal] = useState(false);
   const [showRuleModal, setShowRuleModal] = useState(false);
   const [connectionError, setConnectionError] = useState('');
@@ -209,7 +209,7 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, setDarkMode
   return (
     <div>
       <div className="dark-mode-toggle-container">
-        <DarkModeToggle isDark={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />
+        <DarkModeToggle isDark={darkMode} toggleDarkMode={toggleDarkMode} />
         <RoomCodeDisplay roomCode={roomCode} />
       </div>
       <Container className="game-page">

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.scss';
 import GamePage from './pages/game-page/GamePage';
 import LandingPage from './pages/landing-page/LandingPage';
@@ -9,6 +9,15 @@ const App = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [ws, setWs] = useState(null);
 
+  const toggleDarkMode = () => {
+    localStorage.setItem('darkMode', (!darkMode).toString());
+    setDarkMode(!darkMode);
+  };
+
+  useEffect(() => {
+    if (localStorage.getItem('darkMode') === 'true') setDarkMode(true);
+  }, []);
+
   return (
     <div className={`app${darkMode ? ' dark' : ''}`}>
       {playerId >= 0 && roomState ? (
@@ -18,7 +27,7 @@ const App = () => {
           ws={ws}
           setRoomState={setRoomState}
           darkMode={darkMode}
-          setDarkMode={setDarkMode}
+          toggleDarkMode={toggleDarkMode}
         />
       ) : (
         <LandingPage
@@ -26,7 +35,7 @@ const App = () => {
           setRoomState={setRoomState}
           setWs={setWs}
           darkMode={darkMode}
-          setDarkMode={setDarkMode}
+          toggleDarkMode={toggleDarkMode}
         />
       )}
       <div className="main-footer">

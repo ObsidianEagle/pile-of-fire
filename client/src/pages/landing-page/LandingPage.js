@@ -8,7 +8,7 @@ import './LandingPage.scss';
 const PROTOCOL = process.env.REACT_APP_USE_WSS === 'true' ? 'wss' : 'ws';
 const HOST = process.env.REACT_APP_SERVER_ADDRESS;
 
-const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, setDarkMode }) => {
+const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMode }) => {
   let initialRoomCode = '';
   if (window.location.search.length) {
     const queryParams = window.location.search
@@ -109,7 +109,7 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, setDarkMode }
   return (
     <div className="landing-page">
       <div className="dark-mode-toggle-container">
-        <DarkModeToggle isDark={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />
+        <DarkModeToggle isDark={darkMode} toggleDarkMode={toggleDarkMode} />
       </div>
       <Container textAlign="center">
         <Header className="main-header">Pile of Fire</Header>
