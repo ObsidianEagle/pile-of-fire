@@ -2,7 +2,7 @@
   height: 14vh;
   width: 10vh;
 
-  @media (max-width: ar(--mobile-max-width)) {
+  @media (max-width: var(--mobile-max-width)) {
     height: 10.5vh;
     width: 7.5vh;
   }

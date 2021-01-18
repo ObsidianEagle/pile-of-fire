@@ -2,7 +2,6 @@
   margin-top: 2em;
 
   @media (max-width: --mobile-max-width) {
-    margin-top: 2em;
     font-size: 0.8em;
 
     h1 {
@@ -27,10 +26,19 @@
   h4 {
     margin: 0.5em;
   }
+
+  .card {
+    background-color: var(--bg-colour-2);
+    box-shadow: none;
+
+    .content {
+      border-top: 2px solid var(--bg-colour-3);
+    }
+  }
 }
 
 .dark-mode-toggle-container {
-  margin: 1em 0 0 1em;
+  padding: 1em 0 0 1em;
   display: flex;
   gap: 1em;
 }
