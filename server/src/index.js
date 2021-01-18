@@ -54,7 +54,7 @@ wss.on('connection', (ws) => {
     /* DEBUG */
     console.log(reqString);
 
-    const room = rooms.find((room) => room.code === req.room?.toUpperCase());
+    const room = rooms.find((room) => req.room ? room.code === req.room.toUpperCase() : null);
     if (req.type !== PLAYER_INIT && req.type !== ROOM_INIT && !room) {
       console.debug(`client ${ws.id}: message did not contain valid room code`);
       sendServerError('Message did not contain valid room code', [ws]);
