@@ -96,7 +96,7 @@ export const removePlayer = (gameState, ws, clients) => {
 
 export const skipTurn = (gameState) => {
   gameState.nextPlayer =
-    gameState.players[(gameState.players.findIndex((player) => player.id === ws.id) + 1) % gameState.players.length].id;
+    gameState.players[(gameState.players.findIndex((player) => player.id === gameState.nextPlayer) + 1) % gameState.players.length].id;
 };
 
 export const addMates = (chooserId, chosenId, gameState) => {

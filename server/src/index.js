@@ -8,12 +8,13 @@ import {
   PLAYER_CHOICE_RESPONSE,
   PLAYER_INIT,
   RESTART_GAME,
-  ROOM_INIT
+  ROOM_INIT,
+  SKIP_TURN
 } from './constants/messages.js';
 import { IN_PROGRESS } from './constants/statuses.js';
 import { broadcastRoomState, initialisePlayer, sendServerError } from './gameMessages.js';
 import { createRoom } from './gameSetup.js';
-import { addMates, changeRules, drawCard, removePlayer, restartGame } from './gameUpdates.js';
+import { addMates, changeRules, drawCard, removePlayer, restartGame, skipTurn } from './gameUpdates.js';
 
 // SERVER
 let PORT = 8080;
@@ -108,6 +109,16 @@ wss.on('connection', (ws) => {
         drawCard(gameState, ws, clients);
         console.debug(`client ${ws.id}: drew card`);
         broadcastRoomState(room, clients);
+        break;
+
+      case SKIP_TURN:
+        if (ws.id === room.host) {
+          skipTurn(gameState);
+          console.debug(`client ${ws.id}: host skipped current turn`);
+          broadcastRoomState(room, clients);
+        } else {
+          console.debug(`client ${ws.id}: attempted to skip turn while not host`);
+        }
         break;
 
       case RESTART_GAME:
