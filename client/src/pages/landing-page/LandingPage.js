@@ -38,7 +38,8 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
 
     ws.onopen = () => {
       ws.send(JSON.stringify({ type: PLAYER_INIT, payload: { name: name.trim(), room: roomCode } }));
-      window.setInterval(() => ws.send(JSON.stringify({ type: 'PING' })), 60000);
+      const preventTimeoutInterval = window.setInterval(() => fetch(HOST), 1500000);
+      localStorage.setItem('preventTimeoutInterval', preventTimeoutInterval);
     };
 
     ws.onmessage = (e) => {
@@ -61,7 +62,11 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
 
     ws.onerror = (e) => console.error(`WebSocket error: ${JSON.stringify(e)}`);
 
-    ws.onclose = (e) => console.error(`Connection closed: ${e.code} - ${e.reason}`);
+    ws.onclose = (e) => {
+      console.error(`Connection closed: ${e.code} - ${e.reason}`);
+      const preventTimeoutInterval = localStorage.getItem('preventTimeoutInterval');
+      window.clearInterval(preventTimeoutInterval);
+    }
   };
 
   const createRoom = (event, name, numberOfDecks) => {
