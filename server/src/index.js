@@ -51,11 +51,8 @@ wss.on('connection', (ws) => {
   ws.on('message', (reqString) => {
     const req = JSON.parse(reqString);
 
-    /* DEBUG */
-    console.log(reqString);
-
     const room = rooms.find((room) => req.room ? room.code === req.room.toUpperCase() : null);
-    if (![PLAYER_INIT, ROOM_INIT, 'PING'].includes(req.type) && !room) {
+    if (![PLAYER_INIT, ROOM_INIT].includes(req.type) && !room) {
       console.debug(`client ${ws.id}: message did not contain valid room code`);
       sendServerError('Message did not contain valid room code', [ws]);
       return;
@@ -176,7 +173,7 @@ wss.on('error', (err) => {
 
 console.info(`Server running on port ${PORT}`);
 
-// Heartbeat to prevent connections from going idle
+// Heartbeat just in case for stale clients
 setInterval(() => {
   if (clients.length) {
     rooms.forEach(room => broadcastRoomState(room, clients));
