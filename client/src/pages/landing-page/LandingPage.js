@@ -38,7 +38,10 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
 
     ws.onopen = () => {
       ws.send(JSON.stringify({ type: PLAYER_INIT, payload: { name: name.trim(), room: roomCode } }));
-      const preventTimeoutInterval = window.setInterval(() => fetch(HOST), 1500000);
+      const preventTimeoutInterval = window.setInterval(
+        () => fetch(`https://${HOST}`, { mode: 'no-cors' }).catch(() => {}),
+        1500000
+      );
       localStorage.setItem('preventTimeoutInterval', preventTimeoutInterval);
     };
 
@@ -66,7 +69,7 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
       console.error(`Connection closed: ${e.code} - ${e.reason}`);
       const preventTimeoutInterval = localStorage.getItem('preventTimeoutInterval');
       window.clearInterval(preventTimeoutInterval);
-    }
+    };
   };
 
   const createRoom = (event, name, numberOfDecks) => {
@@ -86,7 +89,10 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
           }
         })
       );
-      const preventTimeoutInterval = window.setInterval(() => fetch(HOST), 1500000);
+      const preventTimeoutInterval = window.setInterval(
+        () => fetch(`https://${HOST}`, { mode: 'no-cors' }).catch(() => {}),
+        1500000
+      );
       localStorage.setItem('preventTimeoutInterval', preventTimeoutInterval);
     };
 
@@ -115,7 +121,7 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
       setErrorMessage(`Connection closed: ${e.code} - ${e.reason}`);
       const preventTimeoutInterval = localStorage.getItem('preventTimeoutInterval');
       window.clearInterval(preventTimeoutInterval);
-    }
+    };
   };
 
   return (
