@@ -86,7 +86,8 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
           }
         })
       );
-      window.setInterval(() => ws.send(JSON.stringify({ type: 'PING' })), 60000);
+      const preventTimeoutInterval = window.setInterval(() => fetch(HOST), 1500000);
+      localStorage.setItem('preventTimeoutInterval', preventTimeoutInterval);
     };
 
     ws.onmessage = (e) => {
@@ -110,7 +111,11 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
 
     ws.onerror = (e) => setErrorMessage(`WebSocket error: ${JSON.stringify(e)}`);
 
-    ws.onclose = (e) => setErrorMessage(`Connection closed: ${e.code} - ${e.reason}`);
+    ws.onclose = (e) => {
+      setErrorMessage(`Connection closed: ${e.code} - ${e.reason}`);
+      const preventTimeoutInterval = localStorage.getItem('preventTimeoutInterval');
+      window.clearInterval(preventTimeoutInterval);
+    }
   };
 
   return (
