@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Container, Divider, Grid, Header, Input, Segment } from 'semantic-ui-react';
+import { Button, Checkbox, Container, Divider, Grid, Header, Input, Segment } from 'semantic-ui-react';
 import DarkModeToggle from '../../components/dark-mode-toggle/DarkModeToggle';
 import StatusMessage from '../../components/status-message/StatusMessage';
 import { PLAYER_INIT, PLAYER_INIT_ACK, ROOM_INIT, SERVER_ERROR } from '../../constants/messages';
@@ -21,6 +21,7 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
 
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState(initialRoomCode);
+  const [endless, setEndless] = useState(false);
   const [numberOfDecks, setNumberOfDecks] = useState(1);
   const [errorMessage, setErrorMessage] = useState('');
   const [connecting, setConnecting] = useState(false);
@@ -85,7 +86,8 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
           type: ROOM_INIT,
           payload: {
             name: name.trim(),
-            numberOfDecks: isNaN(decks) || decks < 1 ? 1 : decks
+            numberOfDecks: isNaN(decks) || decks < 1 ? 1 : decks,
+            endless
           }
         })
       );
@@ -148,8 +150,15 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
                   onChange={(e) => setNumberOfDecks(e.target.value)}
                   className="form-element form-input"
                   maxLength={2}
+                  disabled={endless}
                 />
-                <br />
+                <div>
+                  <Checkbox
+                    label="Endless Mode"
+                    onChange={() => setEndless(!endless)}
+                    className="form-element form-checkbox"
+                  />
+                </div>
                 <Button
                   disabled={!name || connecting}
                   onClick={(e) => createRoom(e, name, numberOfDecks)}

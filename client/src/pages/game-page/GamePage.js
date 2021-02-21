@@ -77,7 +77,7 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
   const {
     code: roomCode,
     host: hostId,
-    gameState: { nextPlayer, lastPlayer, deck, lastCardDrawn, players, specialHolders, status, rules, mates }
+    gameState: { nextPlayer, lastPlayer, deck, lastCardDrawn, players, specialHolders, status, rules, mates, endless }
   } = roomState;
 
   const sendDrawCardMessage = () => {
@@ -156,7 +156,7 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
             )}
           </Grid.Column>
           <Grid.Column width={8}>
-            <Deck cardsRemaining={deck.length} />
+            <Deck cardsRemaining={deck.length} endless={endless} />
             <PlayerList
               players={players}
               nextPlayerName={findPlayerName(nextPlayer)}
@@ -206,7 +206,7 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
           />
         </Grid.Column>
         <Grid.Column>
-          <Deck cardsRemaining={deck.length} />
+          <Deck cardsRemaining={deck.length} endless={endless} />
           <GameButtons
             drawButtonDisabled={nextPlayer !== playerId || status !== IN_PROGRESS}
             restartButtonVisible={status === GAME_ENDED || status === GAME_ENDED_FROM_ERROR}
