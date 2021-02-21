@@ -2,8 +2,14 @@ import { GAME_ENDED, IN_PROGRESS, WAITING_FOR_PLAYER } from './constants/statuse
 import { requestPlayerChoice } from './gameMessages.js';
 import { populateDeck } from './gameSetup.js';
 
-export const checkGameEnded = (gameState) => {
-  if (!gameState.deck.length) gameState.status = GAME_ENDED;
+export const handleEmptyDeck = (gameState) => {
+  if (!gameState.deck.length) {
+    if (gameState.endless) {
+      gameState.deck = populateDeck(1);
+    } else {
+      gameState.status = GAME_ENDED;
+    }
+  }
 };
 
 export const drawCard = (gameState, ws) => {

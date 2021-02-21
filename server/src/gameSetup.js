@@ -23,9 +23,10 @@ export const generateRoomCode = (rooms) => {
   }
 };
 
-export const createNewGameState = (numberOfDecks) => ({
-  deck: populateDeck(numberOfDecks),
+export const createNewGameState = (numberOfDecks, endless) => ({
+  deck: populateDeck(endless ? 1 : numberOfDecks),
   status: IN_PROGRESS,
+  endless: endless || false,
   lastCardDrawn: null,
   lastPlayer: null,
   nextPlayer: null,
@@ -39,11 +40,11 @@ export const createNewGameState = (numberOfDecks) => ({
   }
 });
 
-export const createRoom = (rooms, hostId, numberOfDecks) => {
+export const createRoom = (rooms, hostId, numberOfDecks, endless) => {
   const newRoom = {
     code: generateRoomCode(rooms),
     host: hostId,
-    gameState: createNewGameState(numberOfDecks)
+    gameState: createNewGameState(numberOfDecks, endless)
   };
   rooms.push(newRoom);
 };

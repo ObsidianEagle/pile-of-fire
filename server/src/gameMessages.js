@@ -1,9 +1,9 @@
 import { ROOM_STATE, PLAYER_CHOICE_REQUEST, PLAYER_INIT_ACK, SERVER_ERROR } from './constants/messages.js';
 import { WAITING_FOR_PLAYER } from './constants/statuses.js';
-import { checkGameEnded } from './gameUpdates.js';
+import { handleEmptyDeck } from './gameUpdates.js';
 
 export const broadcastRoomState = (room, clients) => {
-  checkGameEnded(room.gameState);
+  handleEmptyDeck(room.gameState);
   const msgObject = {
     type: ROOM_STATE,
     payload: { room }

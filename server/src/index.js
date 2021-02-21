@@ -61,7 +61,7 @@ wss.on('connection', (ws) => {
 
     switch (req.type) {
       case ROOM_INIT: {
-        createRoom(rooms, ws.id, req.payload.numberOfDecks);
+        createRoom(rooms, ws.id, req.payload.numberOfDecks, req.payload.endless);
         const room = rooms.find((room) => room.host === ws.id);
         console.debug(`client ${ws.id}: room created with code ${room.code}`);
         initialisePlayer(req.payload.name, room.code, rooms, ws);
