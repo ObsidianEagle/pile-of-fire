@@ -5,6 +5,11 @@ import './RuleModal.scss';
 const RuleModal = ({ isOpen, chooseRule, rules }) => {
   const [inputRule, setInputRule] = useState('');
 
+  const handleSubmit = () => {
+    chooseRule(inputRule);
+    setInputRule('');
+  }
+
   return (
     <Modal open={isOpen} className="rule-modal">
       <Modal.Content>
@@ -12,7 +17,7 @@ const RuleModal = ({ isOpen, chooseRule, rules }) => {
         <Input
           action={{ 
             content: 'Add Rule',
-            onClick: () => chooseRule(inputRule),
+            onClick: () => handleSubmit(inputRule),
             disabled: inputRule.length < 1
           }}
           value={inputRule}
