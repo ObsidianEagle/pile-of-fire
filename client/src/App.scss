@@ -34,6 +34,10 @@
     position: static;
   }
 
+  @media (max-height: 600px) {
+    position: relative;
+  }
+
   a {
     color: --primary-colour;
   }
