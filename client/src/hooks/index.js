@@ -16,7 +16,7 @@ export const useAudio = () => {
   }, [audioContext]);
 
   const playLoop = useCallback((buffer) => {
-    let { audioData, srcNode, destination } = audioContext;
+    let { audioData, destination } = audioContext;
 
     // Setup gain node (to control volume)
     const gainNode = audioContext.createGain();
@@ -24,7 +24,7 @@ export const useAudio = () => {
 
     // Setup source node
     if (!audioData) audioData = buffer;
-    srcNode = audioContext.createBufferSource();
+    const srcNode = audioContext.createBufferSource();
     srcNode.buffer = buffer;
     srcNode.loop = true;
 
@@ -34,18 +34,20 @@ export const useAudio = () => {
 
     // Begin playback
     srcNode.start();
+    audioContext.srcNode = srcNode;
+    console.log(audioContext);
   }, [audioContext]);
 
   useEffect(() => {
     if (playing) {
       console.log('Playing audio');
       playLoop(audioBuffer);
-    } else if (audioBuffer) {
+    } else if (audioContext) {
       console.log('Pausing audio');
-      audioBuffer.srcNode?.stop();
-      audioBuffer.srcNode = null;
+      audioContext.srcNode?.stop();
+      audioContext.srcNode = null;
     }
-  }, [audioBuffer, playing, playLoop]);
+  }, [audioBuffer, audioContext, playing, playLoop]);
 
   return [playing, setPlaying];
 };
