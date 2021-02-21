@@ -131,12 +131,15 @@ export const addMates = (chooserId, chosenId, gameState) => {
   }
 };
 
-export const changeRules = (chosenRule, gameState) => {
-  const ruleInListIndex = gameState.rules.findIndex((rule) => rule === chosenRule);
+export const changeRules = (rule, gameState) => {
+  const ruleInListIndex = typeof rule === 'number' ? gameState.rules.findIndex((item) => item.id === rule) : -1
   if (ruleInListIndex >= 0) {
     gameState.rules.splice(ruleInListIndex, 1);
   } else {
-    gameState.rules.push(chosenRule);
+    gameState.rules.push({
+      id: Date.now(),
+      rule
+    });
   }
 };
 

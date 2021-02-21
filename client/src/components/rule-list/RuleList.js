@@ -9,7 +9,7 @@ const RuleList = ({ rules }) => (
     <Card.Content className="rule-list-content">
       <ul>
         {rules.map((rule) => (
-          <li key={rule}>{rule}</li>
+          <li key={rule.id}>{rule.rule}</li>
         ))}
       </ul>
     </Card.Content>

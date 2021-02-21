@@ -25,8 +25,8 @@ const RuleModal = ({ isOpen, chooseRule, rules }) => {
             <br />
             <h3>Or remove an existing rule</h3>
             {rules.map((rule) => (
-              <Button key={rule} onClick={() => chooseRule(rule)} fluid className="rule-button">
-                {rule}
+              <Button key={rule.id} onClick={() => chooseRule(rule.id)} fluid className="rule-button">
+                {rule.rule}
               </Button>
             ))}
           </>
