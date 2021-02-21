@@ -119,7 +119,7 @@ wss.on('connection', (ws) => {
         break;
 
       case RESTART_GAME:
-        restartGame(gameState, numberOfDecks);
+        restartGame(gameState, 1);
         console.debug(`client ${ws.id}: restarted game`);
         broadcastRoomState(room, clients);
         break;
