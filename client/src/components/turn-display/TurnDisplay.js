@@ -1,8 +1,20 @@
+import { useEffect } from 'react';
 import { Container, Grid } from 'semantic-ui-react';
 import { rules } from '../../constants/rules';
+import { useAudio } from '../../hooks';
 import PlayingCard from '../playing-card/PlayingCard';
 
 const TurnDisplay = ({ playerName, card, mobile }) => {
+  const [, setAudioPlaying] = useAudio();
+
+  useEffect(() => {
+    if (card && card.suit === 'SPADES' && card.value === 'A') {
+      setAudioPlaying(true);
+    } else {
+      setAudioPlaying(false);
+    }
+  }, [card, setAudioPlaying]);
+
   if (!card) return null;
 
   const { name, description } = rules[card.value];

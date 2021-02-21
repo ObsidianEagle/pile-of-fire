@@ -5,6 +5,8 @@ import App from './App';
 import './index.scss';
 import reportWebVitals from './reportWebVitals';
 
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
 ReactDOM.render(<App />, document.getElementById('root'));
 
 // If you want to start measuring performance in your app, pass a function
