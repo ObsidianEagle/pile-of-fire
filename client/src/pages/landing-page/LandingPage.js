@@ -60,7 +60,7 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
           ws.close();
           break;
         default:
-          console.log(msg);
+          console.debug(msg);
           break;
       }
       setConnecting(false);
@@ -123,7 +123,7 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
           ws.close();
           break;
         default:
-          console.log(msg);
+          console.debug(msg);
           break;
       }
       setConnecting(false);

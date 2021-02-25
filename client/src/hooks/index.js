@@ -35,15 +35,14 @@ export const useAudio = () => {
     // Begin playback
     srcNode.start();
     audioContext.srcNode = srcNode;
-    console.log(audioContext);
   }, [audioContext]);
 
   useEffect(() => {
     if (playing) {
-      console.log('Playing audio');
+      console.debug('Playing audio');
       playLoop(audioBuffer);
     } else if (audioContext) {
-      console.log('Pausing audio');
+      console.debug('Pausing audio');
       audioContext.srcNode?.stop();
       audioContext.srcNode = null;
     }

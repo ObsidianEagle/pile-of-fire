@@ -51,12 +51,12 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
               setShowRuleModal(true);
               break;
             default:
-              console.log(msg);
+              console.debug(msg);
               break;
           }
           break;
         default:
-          console.log(msg);
+          console.debug(msg);
           break;
       }
     };
