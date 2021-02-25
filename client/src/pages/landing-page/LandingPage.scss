@@ -1,66 +1,72 @@
 @import '../../styles/global';
 
 .landing-page {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 
-    .ui.main-header {
-        margin-top: 16vh;
-        font-size: 8em;
-        color: var(--primary-colour);
+  .ui.main-header {
+    margin-top: 16vh;
+    font-size: 8em;
+    color: var(--primary-colour);
 
-        @media (max-width: $mobile-max-width) {
-            margin-top: 5vh;
-            font-size: 6em;
-        }
+    @media (max-width: $mobile-max-width) {
+      margin-top: 5vh;
+      font-size: 6em;
     }
+  }
 
-    .ui.segment {
-        background-color: var(--bg-colour);
+  .ui.segment {
+    background-color: var(--bg-colour);
+  }
+
+  .ui.divider {
+    color: var(--text-colour);
+
+    @media (max-width: $mobile-max-width) {
+      display: none;
     }
+  }
 
-    .ui.divider {
+  .dark-mode-toggle-container {
+    margin: 1em 0 0 1em;
+  }
+
+  .form-element {
+    margin: 1em 0;
+  }
+
+  .form-input {
+    width: 100%;
+    max-width: 24em;
+
+    & > input {
+      background-color: var(--bg-colour-2);
+      color: var(--text-colour);
+      border: none;
+
+      &:focus {
+        background-color: var(--bg-colour-2);
         color: var(--text-colour);
+      }
     }
 
-    .dark-mode-toggle-container {
-        margin: 1em 0 0 1em;
+    & > .label {
+      background-color: var(--bg-colour-3);
+      color: var(--text-colour);
     }
+  }
 
-    .form-element {
-        margin: 1em 0;
+  .form-checkbox {
+    & > input ~ label,
+    & > input:focus ~ label {
+      color: var(--text-colour);
     }
+  }
 
-    .form-input {
-        width: 24em;
-
-        & > input {
-            background-color: var(--bg-colour-2);
-            color: var(--text-colour);
-            border: none;
-
-            &:focus {
-                background-color: var(--bg-colour-2);
-                color: var(--text-colour);
-            }
-        }
-
-        & > .label {
-            background-color: var(--bg-colour-3);
-            color: var(--text-colour);
-        }
-    }
-
-    .form-checkbox {
-        & > input~label, & > input:focus~label {
-            color: var(--text-colour);
-        }
-    }
-
-    .enter-game-button {
-        padding: 1em 2em;
-        background-color: var(--primary-colour);
-        color: white;
-        width: fit-content;
-    }
+  .enter-game-button {
+    padding: 1em 2em;
+    background-color: var(--primary-colour);
+    color: white;
+    width: fit-content;
+  }
 }
