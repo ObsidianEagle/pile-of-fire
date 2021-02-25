@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import './App.scss';
+import ErrorMessage from './components/error-message/ErrorMessage';
 import GamePage from './pages/game-page/GamePage';
 import LandingPage from './pages/landing-page/LandingPage';
 
@@ -20,6 +21,7 @@ const App = () => {
 
   return (
     <div className={`app${darkMode ? ' dark' : ''}`}>
+      <ErrorMessage header={'Header'} content={'content'} onDismiss={null} />
       {playerId >= 0 && roomState ? (
         <GamePage
           playerId={playerId}

@@ -1,0 +1,21 @@
+.ui.error-message {
+  position: absolute;
+  top: 1em;
+  right: 1em;
+  max-width: 16em;
+}
+
+.dark {
+  .ui.error-message {
+    background-color: var(--bg-colour);
+    color: var(--error-text-colour);
+
+    .content {
+      margin-right: 1em;
+
+      .header {
+        color: var(--error-text-colour);
+      }
+    }
+  }
+}
