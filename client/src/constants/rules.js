@@ -54,7 +54,7 @@ export const rules = {
     description: 'If anyone answers a question you ask, they must drink.'
   },
   K: {
-    name: '???',
-    description: '???'
+    name: 'Execution',
+    description: 'Pick another player. The other players must vote between you and that player. Whoever receives the most votes drinks.'
   }
 };
