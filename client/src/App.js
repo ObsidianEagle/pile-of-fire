@@ -21,7 +21,7 @@ const App = () => {
 
   return (
     <div className={`app${darkMode ? ' dark' : ''}`}>
-      <ErrorMessage header={'Header'} content={'content'} onDismiss={null} />
+      <ErrorMessage />
       {playerId >= 0 && roomState ? (
         <GamePage
           playerId={playerId}

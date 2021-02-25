@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Button, Checkbox, Container, Divider, Grid, Header, Input, Segment } from 'semantic-ui-react';
 import DarkModeToggle from '../../components/dark-mode-toggle/DarkModeToggle';
-import StatusMessage from '../../components/status-message/StatusMessage';
 import { PLAYER_INIT, PLAYER_INIT_ACK, ROOM_INIT, SERVER_ERROR } from '../../constants/messages';
+import eventBus from '../../utils/eventBus';
 import './LandingPage.scss';
 
 const PROTOCOL = process.env.REACT_APP_USE_WSS === 'true' ? 'wss' : 'ws';
@@ -23,7 +23,6 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
   const [roomCode, setRoomCode] = useState(initialRoomCode);
   const [endless, setEndless] = useState(false);
   const [numberOfDecks, setNumberOfDecks] = useState(1);
-  const [errorMessage, setErrorMessage] = useState('');
   const [connecting, setConnecting] = useState(false);
   const [mobileWidth, setMobileWidth] = useState(false);
 
@@ -54,7 +53,10 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
           setPlayerId(msg.payload.id);
           break;
         case SERVER_ERROR:
-          setErrorMessage(msg.payload.errorMessage);
+          eventBus.emit('flash', {
+            header: 'Server Error',
+            content: msg.payload.errorMessage
+          });
           ws.close();
           break;
         default:
@@ -64,10 +66,17 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
       setConnecting(false);
     };
 
-    ws.onerror = (e) => console.error(`WebSocket error: ${JSON.stringify(e)}`);
+    ws.onerror = (e) =>
+      eventBus.emit('flash', {
+        header: 'WebSockets Error',
+        content: `${e.code} - ${e.reason}`
+      });
 
     ws.onclose = (e) => {
-      console.error(`Connection closed: ${e.code} - ${e.reason}`);
+      eventBus.emit('flash', {
+        header: 'WebSockets Error',
+        content: `${e.code} - ${e.reason}`
+      });
       const preventTimeoutInterval = localStorage.getItem('preventTimeoutInterval');
       window.clearInterval(preventTimeoutInterval);
     };
@@ -106,7 +115,10 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
           setPlayerId(msg.payload.id);
           break;
         case SERVER_ERROR:
-          setErrorMessage(msg.payload.errorMessage);
+          eventBus.emit('flash', {
+            header: 'Server Error',
+            content: msg.payload.errorMessage
+          });
           console.error(msg.payload.errorMessage);
           ws.close();
           break;
@@ -117,10 +129,17 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
       setConnecting(false);
     };
 
-    ws.onerror = (e) => setErrorMessage(`WebSocket error: ${JSON.stringify(e)}`);
+    ws.onerror = (e) =>
+      eventBus.emit('flash', {
+        header: 'WebSockets Error',
+        content: `${e.code} - ${e.reason}`
+      });
 
     ws.onclose = (e) => {
-      setErrorMessage(`Connection closed: ${e.code} - ${e.reason}`);
+      eventBus.emit('flash', {
+        header: 'WebSockets Error',
+        content: `${e.code} - ${e.reason}`
+      });
       const preventTimeoutInterval = localStorage.getItem('preventTimeoutInterval');
       window.clearInterval(preventTimeoutInterval);
     };
@@ -199,7 +218,6 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
           </Grid>
           {!mobileWidth && <Divider vertical>OR</Divider>}
         </Segment>
-        {errorMessage.length > 0 && <StatusMessage message={errorMessage} />}
       </Container>
     </div>
   );

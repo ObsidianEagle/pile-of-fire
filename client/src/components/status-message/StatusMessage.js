@@ -30,8 +30,8 @@ const StatusMessage = ({ status, playerName, message }) => {
       break;
   }
 
-  if (!messageText.length && !message.length) return null;
-  if (message.length) return <Message negative>{message}</Message>
+  if (!messageText.length && !message?.length) return null;
+  if (message?.length) return <Message negative>{message}</Message>
   return <Message {...messageType}>{messageText}</Message>;
 };
 

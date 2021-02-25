@@ -15,19 +15,19 @@ import StatusMessage from '../../components/status-message/StatusMessage';
 import TurnDisplay from '../../components/turn-display/TurnDisplay';
 import {
   DRAW_CARD,
-  ROOM_STATE,
   PLAYER_CHOICE_REQUEST,
   PLAYER_CHOICE_RESPONSE,
   RESTART_GAME,
+  ROOM_STATE,
   SKIP_TURN
 } from '../../constants/messages';
 import { GAME_ENDED, GAME_ENDED_FROM_ERROR, IN_PROGRESS } from '../../constants/statuses';
+import eventBus from '../../utils/eventBus';
 import './GamePage.scss';
 
 const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkMode }) => {
   const [showMateModal, setShowMateModal] = useState(false);
   const [showRuleModal, setShowRuleModal] = useState(false);
-  const [connectionError, setConnectionError] = useState('');
   const [mobileWidth, setMobileWidth] = useState(false);
 
   useEffect(() => {
@@ -62,7 +62,10 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
     };
 
     ws.onclose = () => {
-      setConnectionError('Game connection closed by server');
+      eventBus.emit('flash', {
+        header: 'Server Error',
+        content: 'Connection closec'
+      });
       setTimeout(window.location.reload.bind(window.location), 5000);
     };
   }, [setRoomState, ws]);
@@ -139,7 +142,7 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
     <Grid stackable>
       <Grid.Column width={10}>
         <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} />
-        <StatusMessage playerName={findPlayerName(lastPlayer)} status={status} message={connectionError} />
+        <StatusMessage playerName={findPlayerName(lastPlayer)} status={status} />
         {rules.length ? <RuleList rules={rules} /> : null}
       </Grid.Column>
       <Grid.Column width={6}>
@@ -179,7 +182,7 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
   const mobileView = (
     <>
       <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} mobile={true} />
-      <StatusMessage playerName={findPlayerName(lastPlayer)} status={status} message={connectionError} />
+      <StatusMessage playerName={findPlayerName(lastPlayer)} status={status} />
       {rules.length ? <RuleList rules={rules} /> : null}
       {Object.keys(specialHolders).filter((key) => specialHolders[key]).length ? (
         <Grid columns={Object.keys(specialHolders).filter((key) => specialHolders[key]).length}>
