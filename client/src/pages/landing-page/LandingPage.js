@@ -148,9 +148,11 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
 
   return (
     <div className="landing-page">
-      <div className="dark-mode-toggle-container">
-        <MuteToggle isMuted={muted} toggleMute={toggleMute} />
-        <DarkModeToggle isDark={darkMode} toggleDarkMode={toggleDarkMode} />
+      <div className="top-bar">
+        <div className="top-bar-right">
+          <MuteToggle isMuted={muted} toggleMute={toggleMute} />
+          <DarkModeToggle isDark={darkMode} toggleDarkMode={toggleDarkMode} />
+        </div>
       </div>
       <Container textAlign="center">
         <Header className="main-header">Pile of Fire</Header>

@@ -224,10 +224,14 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
 
   return (
     <div>
-      <div className="dark-mode-toggle-container">
-        <MuteToggle isMuted={muted} toggleMute={toggleMute} />
-        <DarkModeToggle isDark={darkMode} toggleDarkMode={toggleDarkMode} />
-        <RoomCodeDisplay roomCode={roomCode} />
+      <div className="top-bar">
+        <div className="top-bar-left">
+          <RoomCodeDisplay roomCode={roomCode} />
+        </div>
+        <div className="top-bar-right">
+          <MuteToggle isMuted={muted} toggleMute={toggleMute} />
+          <DarkModeToggle isDark={darkMode} toggleDarkMode={toggleDarkMode} />
+        </div>
       </div>
       <Container className="game-page">
         <MateModal playerId={playerId} players={players} mates={mates} chooseMate={chooseMate} isOpen={showMateModal} />

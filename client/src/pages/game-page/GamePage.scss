@@ -39,8 +39,16 @@
   }
 }
 
-.dark-mode-toggle-container {
-  padding: 1em 0 0 1em;
-  display: flex;
-  gap: 1em;
+.top-bar {
+  padding: 1em;
+
+  &-left {
+    float: left;
+  }
+
+  &-right {
+    display: flex;
+    gap: 1em;
+    float: right;
+  }
 }
