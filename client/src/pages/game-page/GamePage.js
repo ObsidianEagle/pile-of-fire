@@ -6,6 +6,7 @@ import Deck from '../../components/deck/Deck';
 import GameButtons from '../../components/game-buttons/GameButtons';
 import MateList from '../../components/mate-list/MateList';
 import MateModal from '../../components/mate-modal/MateModal';
+import MuteToggle from '../../components/mute-toggle/MuteToggle';
 import PlayerList from '../../components/player-list/PlayerList';
 import RoomCodeDisplay from '../../components/room-code-display/RoomCodeDisplay';
 import RuleList from '../../components/rule-list/RuleList';
@@ -25,7 +26,7 @@ import { GAME_ENDED, GAME_ENDED_FROM_ERROR, IN_PROGRESS } from '../../constants/
 import eventBus from '../../utils/eventBus';
 import './GamePage.scss';
 
-const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkMode }) => {
+const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkMode, muted, toggleMute }) => {
   const [showMateModal, setShowMateModal] = useState(false);
   const [showRuleModal, setShowRuleModal] = useState(false);
   const [mobileWidth, setMobileWidth] = useState(false);
@@ -141,7 +142,7 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
   const desktopView = (
     <Grid stackable>
       <Grid.Column width={10}>
-        <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} />
+        <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} isMuted={muted} />
         <StatusMessage playerName={findPlayerName(lastPlayer)} status={status} />
         {rules.length ? <RuleList rules={rules} /> : null}
       </Grid.Column>
@@ -181,7 +182,7 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
 
   const mobileView = (
     <>
-      <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} mobile={true} />
+      <TurnDisplay playerName={findPlayerName(lastPlayer)} card={lastCardDrawn} mobile={true} isMuted={muted} />
       <StatusMessage playerName={findPlayerName(lastPlayer)} status={status} />
       {rules.length ? <RuleList rules={rules} /> : null}
       {Object.keys(specialHolders).filter((key) => specialHolders[key]).length ? (
@@ -224,6 +225,7 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
   return (
     <div>
       <div className="dark-mode-toggle-container">
+        <MuteToggle isMuted={muted} toggleMute={toggleMute} />
         <DarkModeToggle isDark={darkMode} toggleDarkMode={toggleDarkMode} />
         <RoomCodeDisplay roomCode={roomCode} />
       </div>

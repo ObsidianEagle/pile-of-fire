@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Checkbox, Container, Divider, Grid, Header, Input, Segment } from 'semantic-ui-react';
 import DarkModeToggle from '../../components/dark-mode-toggle/DarkModeToggle';
+import MuteToggle from '../../components/mute-toggle/MuteToggle';
 import { PLAYER_INIT, PLAYER_INIT_ACK, ROOM_INIT, SERVER_ERROR } from '../../constants/messages';
 import eventBus from '../../utils/eventBus';
 import './LandingPage.scss';
@@ -8,7 +9,7 @@ import './LandingPage.scss';
 const PROTOCOL = process.env.REACT_APP_USE_WSS === 'true' ? 'wss' : 'ws';
 const HOST = process.env.REACT_APP_SERVER_ADDRESS;
 
-const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMode }) => {
+const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMode, muted, toggleMute }) => {
   let initialRoomCode = '';
   if (window.location.search.length) {
     const queryParams = window.location.search
@@ -148,6 +149,7 @@ const LandingPage = ({ setPlayerId, setRoomState, setWs, darkMode, toggleDarkMod
   return (
     <div className="landing-page">
       <div className="dark-mode-toggle-container">
+        <MuteToggle isMuted={muted} toggleMute={toggleMute} />
         <DarkModeToggle isDark={darkMode} toggleDarkMode={toggleDarkMode} />
       </div>
       <Container textAlign="center">

@@ -8,6 +8,7 @@ const App = () => {
   const [playerId, setPlayerId] = useState(null);
   const [roomState, setRoomState] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
+  const [muted, setMuted] = useState(false);
   const [ws, setWs] = useState(null);
 
   const toggleDarkMode = () => {
@@ -15,8 +16,14 @@ const App = () => {
     setDarkMode(!darkMode);
   };
 
+  const toggleMute = () => {
+    localStorage.setItem('muted', (!muted).toString());
+    setMuted(!muted);
+  };
+
   useEffect(() => {
     if (localStorage.getItem('darkMode') === 'true') setDarkMode(true);
+    if (localStorage.getItem('muted') === 'true') setMuted(true);
   }, []);
 
   return (
@@ -30,6 +37,8 @@ const App = () => {
           setRoomState={setRoomState}
           darkMode={darkMode}
           toggleDarkMode={toggleDarkMode}
+          muted={muted}
+          toggleMute={toggleMute}
         />
       ) : (
         <LandingPage
@@ -38,6 +47,8 @@ const App = () => {
           setWs={setWs}
           darkMode={darkMode}
           toggleDarkMode={toggleDarkMode}
+          muted={muted}
+          toggleMute={toggleMute}
         />
       )}
       <div className="main-footer">

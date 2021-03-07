@@ -6,8 +6,8 @@ import { useAudio } from '../../hooks';
 import PlayingCard from '../playing-card/PlayingCard';
 import "./TurnDisplay.scss";
 
-const TurnDisplay = ({ playerName, card, mobile }) => {
-  const [, setAudioPlaying] = useAudio();
+const TurnDisplay = ({ playerName, card, mobile, isMuted }) => {
+  const [, setAudioPlaying] = useAudio(isMuted);
 
   useEffect(() => {
     if (card && card.suit === 'SPADES' && card.value === 'A') {
