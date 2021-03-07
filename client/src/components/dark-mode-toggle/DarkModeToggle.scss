@@ -1,3 +1,17 @@
-.dark-mode-toggle.ui.toggle.checkbox input:checked~label::before {
-  background-color: var(--primary-colour) !important;
+.dark-mode-toggle {
+  background-color: var(--primary-colour);
+}
+
+.icon-wrapper {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+
+  .icon {
+    height: 18px;
+    width: 18px;
+    color: white;
+  }
 }
