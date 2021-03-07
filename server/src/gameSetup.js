@@ -26,6 +26,7 @@ export const generateRoomCode = (rooms) => {
 export const createNewGameState = (numberOfDecks, endless) => ({
   deck: populateDeck(endless ? 1 : numberOfDecks),
   status: IN_PROGRESS,
+  lastCardDrawnAt: Date.now(),
   endless: endless || false,
   lastCardDrawn: null,
   lastPlayer: null,

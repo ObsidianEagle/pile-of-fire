@@ -17,6 +17,7 @@ export const drawCard = (gameState, ws) => {
 
   const card = gameState.deck.splice(Math.floor(Math.random() * gameState.deck.length), 1)[0];
 
+  gameState.lastCardDrawnAt = Date.now();
   gameState.lastCardDrawn = card;
   gameState.lastPlayer = ws.id;
   gameState.nextPlayer =
@@ -102,7 +103,9 @@ export const removePlayer = (gameState, ws, clients) => {
 
 export const skipTurn = (gameState) => {
   gameState.nextPlayer =
-    gameState.players[(gameState.players.findIndex((player) => player.id === gameState.nextPlayer) + 1) % gameState.players.length].id;
+    gameState.players[
+      (gameState.players.findIndex((player) => player.id === gameState.nextPlayer) + 1) % gameState.players.length
+    ].id;
 };
 
 export const addMates = (chooserId, chosenId, gameState) => {
@@ -138,7 +141,7 @@ export const addMates = (chooserId, chosenId, gameState) => {
 };
 
 export const changeRules = (rule, gameState) => {
-  const ruleInListIndex = typeof rule === 'number' ? gameState.rules.findIndex((item) => item.id === rule) : -1
+  const ruleInListIndex = typeof rule === 'number' ? gameState.rules.findIndex((item) => item.id === rule) : -1;
   if (ruleInListIndex >= 0) {
     gameState.rules.splice(ruleInListIndex, 1);
   } else {
@@ -152,6 +155,7 @@ export const changeRules = (rule, gameState) => {
 export const restartGame = (gameState, numberOfDecks) => {
   gameState.deck = populateDeck(numberOfDecks);
   gameState.status = IN_PROGRESS;
+  gameState.lastCardDrawnAt = Date.now();
   gameState.lastCardDrawn = null;
   gameState.lastPlayer = null;
   gameState.nextPlayer = gameState.players.length > 0 ? gameState.players[0].id : null;

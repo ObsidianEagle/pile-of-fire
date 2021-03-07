@@ -15,6 +15,7 @@ import { IN_PROGRESS } from './constants/statuses.js';
 import { broadcastRoomState, initialisePlayer, sendServerError } from './gameMessages.js';
 import { createRoom } from './gameSetup.js';
 import { addMates, changeRules, drawCard, removePlayer, restartGame, skipTurn } from './gameUpdates.js';
+import cron from 'node-cron';
 
 // SERVER
 let PORT = 8080;
@@ -51,7 +52,7 @@ wss.on('connection', (ws) => {
   ws.on('message', (reqString) => {
     const req = JSON.parse(reqString);
 
-    const room = rooms.find((room) => req.room ? room.code === req.room.toUpperCase() : null);
+    const room = rooms.find((room) => (req.room ? room.code === req.room.toUpperCase() : null));
     if (![PLAYER_INIT, ROOM_INIT].includes(req.type) && !room) {
       console.debug(`client ${ws.id}: message did not contain valid room code`);
       sendServerError('Message did not contain valid room code', [ws]);
@@ -70,13 +71,10 @@ wss.on('connection', (ws) => {
       }
 
       case PLAYER_INIT: {
-        const room = rooms.find(room => room.code === req.payload.room.toUpperCase());
+        const room = rooms.find((room) => room.code === req.payload.room.toUpperCase());
         if (!room) {
           console.debug(`client ${ws.id}: attempted to join invalid room ${req.payload.room}`);
-          sendServerError(
-            `A room with that code does not exist`,
-            [ws]
-          );
+          sendServerError(`A room with that code does not exist`, [ws]);
           break;
         }
 
@@ -89,7 +87,7 @@ wss.on('connection', (ws) => {
           );
           break;
         }
-        
+
         initialisePlayer(req.payload.name, req.payload.room.toUpperCase(), rooms, ws);
         console.debug(`client ${ws.id}: player initialised in room ${room.code} with name ${ws.name}`);
         broadcastRoomState(room, clients);
@@ -142,7 +140,7 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
-    const room = rooms.find((room) => room.gameState.players.map(player => player.id).includes(ws.id));
+    const room = rooms.find((room) => room.gameState.players.map((player) => player.id).includes(ws.id));
     const gameState = room ? room.gameState : undefined;
 
     removePlayer(gameState, ws, clients);
@@ -176,9 +174,24 @@ console.info(`Server running on port ${PORT}`);
 // Heartbeat just in case for stale clients
 setInterval(() => {
   if (clients.length) {
-    rooms.forEach(room => broadcastRoomState(room, clients));
+    rooms.forEach((room) => broadcastRoomState(room, clients));
   }
 }, 20000);
+
+// Clear room if no card drawn for 20 minutes
+cron.schedule('*/10 * * * *', () => {
+  console.debug('checking for dead rooms...');
+  rooms.forEach((room) => {
+    if (Math.abs(room.gameState.lastCardDrawnAt - Date.now()) > 1200000) {
+      console.debug(`room ${room.code} has exceeded timeout - kicking players`);
+      room.gameState.players.forEach((player) => {
+        const client = clients.find((client) => client.id === player.id);
+        if (client) client.close();
+      });
+    }
+  });
+  console.debug('dead room check complete');
+});
 
 if (httpsServer) {
   httpsServer.listen(PORT);
