@@ -8,12 +8,16 @@
   "license": "MIT",
   "scripts": {
     "start": "node src/index.js",
-    "watch": "nodemon src/index.js"
+    "watch": "nodemon src/index.js",
+    "test": "ava"
   },
   "dependencies": {
     "dotenv": "^8.2.0",
     "node-cron": "^2.0.3",
     "nodemon": "^2.0.6",
     "ws": "^7.3.1"
+  },
+  "devDependencies": {
+    "ava": "^3.15.0"
   }
 }
