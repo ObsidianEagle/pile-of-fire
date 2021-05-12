@@ -228,7 +228,7 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
           <DarkModeToggle isDark={darkMode} toggleDarkMode={toggleDarkMode} />
         </div>
       </div>
-      <Container className="game-page">
+      <Container fluid className="game-page">
         <MateModal playerId={playerId} players={players} mates={mates} chooseMate={chooseMate} isOpen={showMateModal} />
         <RuleModal rules={rules} chooseRule={chooseRule} isOpen={showRuleModal} />
         {mobileWidth ? mobileView : desktopView}
