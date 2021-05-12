@@ -20,7 +20,7 @@ const MateModal = ({ playerId, players, mates, isOpen, chooseMate }) => {
     }
 
     setAvailablePlayers(newAvailablePlayers);
-  }, [availablePlayers, setAvailablePlayers, players, mates, playerId]);
+  }, [setAvailablePlayers, players, mates, playerId]);
 
   useEffect(() => {
     if (isOpen && !availablePlayers.length) chooseMate(null);
