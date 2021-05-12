@@ -1,13 +1,26 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Modal } from 'semantic-ui-react';
 
-const MateModal = ({ playerId, players, mates, isOpen, chooseMate }) => {
-  let availablePlayers = players.filter((player) => player.id !== playerId);
+const anyPickWillResetMates = (players, mates) =>
+  mates.reduce((acc, cur) => acc + cur.length, 0) === players.length && mates.length === 2;
 
-  if (mates.reduce((acc, val) => acc.concat(val), []).length !== players.length) {
-    const existingPairing = mates.find((pairing) => pairing.includes(playerId));
-    if (existingPairing) availablePlayers = availablePlayers.filter((player) => !existingPairing.includes(player.id));
-  }
+const MateModal = ({ playerId, players, mates, isOpen, chooseMate }) => {
+  const [availablePlayers, setAvailablePlayers] = useState([]);
+
+  useEffect(() => {
+    let newAvailablePlayers = players.filter((player) => player.id !== playerId);
+
+    // If pick won't reset mates, remove player's existing mates
+    // else, leave them all available
+    if (!anyPickWillResetMates(players, mates)) {
+      const existingMates = mates.find((pairing) => pairing.includes(playerId));
+      if (existingMates) {
+        newAvailablePlayers = newAvailablePlayers.filter((player) => !existingMates.includes(player.id));
+      }
+    }
+
+    setAvailablePlayers(newAvailablePlayers);
+  }, [availablePlayers, setAvailablePlayers, players, mates, playerId]);
 
   useEffect(() => {
     if (isOpen && !availablePlayers.length) chooseMate(null);

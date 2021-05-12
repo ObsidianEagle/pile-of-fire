@@ -71,11 +71,6 @@ const GamePage = ({ playerId, roomState, ws, setRoomState, darkMode, toggleDarkM
     };
   }, [setRoomState, ws]);
 
-  /* DEBUG */
-  useEffect(() => {
-    console.debug(roomState);
-  }, [roomState]);
-
   if (!roomState) return null;
 
   const {

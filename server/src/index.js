@@ -155,9 +155,6 @@ wss.on('connection', (ws) => {
       );
       console.debug(`no players remaining, room removed`);
     }
-
-    /* DEBUG */
-    console.debug(rooms);
   });
 
   ws.on('error', (err) => {
